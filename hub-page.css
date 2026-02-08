@@ -1,0 +1,78 @@
+header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, #0759a0, #1d71bb);
+  padding: 24px;
+}
+header h2,
+header p {
+  color: white;
+  margin: 4px;
+  padding: 0px;
+}
+
+.flex-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.feature-card {
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 50%;
+  padding: 16px;
+  gap: 16px;
+  transition: all 0.2s;
+}
+.feature-card:hover {
+  cursor: pointer;
+  transform: translateY(-2px);
+  scale: 1.05;
+}
+.feature-card-icon {
+  height: 32px;
+  width: 32px;
+  background: radial-gradient(circle, #048aff, #1d71bb);
+  stroke: white;
+  padding: 16px;
+  border-radius: 12px;
+  stroke: white;
+  stroke-width: 2px;
+  fill: none;
+}
+.feature-card-content h4 {
+  margin-top: 0px;
+  padding-top: 4px;
+  color: gray;
+}
+.feature-card-content h3 {
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+.feature-card-button {
+  position: absolute;
+  right: 3rem;
+}
+.feature-card:hover .feature-card-button-icon {
+  stroke: black;
+  cursor: pointer;
+  scale: 1.1;
+}
+.feature-card-button-icon {
+  stroke: gray;
+  transition: all 0.2s;
+}
+#guide-text {
+  color: gray;
+}
