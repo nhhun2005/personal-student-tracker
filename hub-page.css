@@ -5,7 +5,9 @@ header {
   align-items: center;
   background: radial-gradient(circle, #0759a0, #1d71bb);
   padding: 24px;
+  position: relative;
 }
+
 header h2,
 header p {
   color: white;

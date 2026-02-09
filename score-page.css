@@ -1,0 +1,152 @@
+header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, #0759a0, #1d71bb);
+  padding: 24px;
+}
+header svg {
+  position: absolute;
+  stroke: white;
+  left: 30%;
+  transition: all 0.2s;
+}
+header svg:hover {
+  scale: 1.1;
+  transform: translateY(-2px);
+  cursor: pointer;
+  stroke-width: 3px;
+}
+header h2,
+header p {
+  color: white;
+  margin: 4px;
+  padding: 0px;
+}
+
+.flex-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+.student-card {
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  width: 40%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  justify-content: center;
+}
+.student-card h4 {
+  color: gray;
+}
+.total-score {
+  padding: 2rem;
+  color: white;
+  border-radius: 12px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  background: #020024;
+  background: linear-gradient(
+    140deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(8, 7, 107, 1) 5%,
+    rgba(0, 212, 255, 1) 100%
+  );
+}
+.total-score p,
+.total-score h2,
+.total-score h3 {
+  margin: 0px;
+  padding: 2px;
+}
+
+.semester-card {
+  border-radius: 12px;
+  padding: 2rem;
+  padding-bottom: 4rem;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+}
+#guide {
+  color: gray;
+  width: 40%;
+}
+.semester-card h3,
+.semester-card h4 {
+  margin: 0px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+select,
+input {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+}
+
+.course-card {
+  border-radius: 12px;
+  padding: 2rem;
+  padding-bottom: 4rem;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+}
+.course-card h4 {
+  margin: 0px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.course-card-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  justify-content: center;
+}
+.save-button {
+  width: 40%;
+  padding: 2rem;
+  background: linear-gradient(
+    140deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(8, 7, 107, 1) 5%,
+    rgba(0, 212, 255, 1) 100%
+  );
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.save-button:hover {
+  cursor: pointer;
+  scale: 1.05;
+  transform: translateY(-2px);
+}
+.note {
+  width: 40%;
+  padding: 2rem;
+  background: #eff6ff;
+  border-radius: 12px;
+  color: #363cb9;
+  font-weight: 600;
+}

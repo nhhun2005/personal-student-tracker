@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="./global-style.css" />
+    <link rel="stylesheet" href="./score-page.css" />
+  </head>
+  <body>
+    <header>
+      <h2>Điểm trung bình học kỳ</h2>
+      <p>Theo dõi điểm trung bình học kỳ</p>
+      <svg
+        class="header-exit-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+    </header>
+    <div class="flex-container">
+      <div class="student-card">
+        <div>
+          <h4>Sinh viên</h4>
+          <h3 id="fullname">This is name</h3>
+        </div>
+        <div>
+          <h4>MSSV</h4>
+          <h3 id="studentid">This is studentid</h3>
+        </div>
+      </div>
+
+      <div class="total-score">
+        <p>Điểm trung bình học kỳ</p>
+        <h2 id="scoreValue">This is score</h2>
+        <h3 id="gradeValue">Điểm chữ:</h3>
+      </div>
+
+      <div class="semester-card">
+        <h3>Thông tin học kỳ</h3>
+        <h4>Học kỳ</h4>
+        <select>
+          <option>HK2 2025-2026</option>
+          <option>HK3 2025-2026</option>
+          <option>HK1 2026-2027</option>
+          <option>HK2 2026-2027</option>
+          <option>HK3 2026-2027</option>
+        </select>
+        <h4>Số môn học</h4>
+        <input type="number" />
+      </div>
+      <h3 id="guide">Danh sách môn học</h3>
+      <div class="course-card">
+        <h4 id="courseName">Môn</h4>
+        <h4>Tên môn học</h4>
+        <input type="text" placeholder="VD: Lập trình căn bản" />
+        <div class="course-card-details">
+          <div>
+            <h4>Số tín chỉ</h4>
+            <input type="number" placeholder="VD: 3" />
+          </div>
+          <div>
+            <h4>Điểm (Thang 4)</h4>
+            <input type="number" placeholder="VD: 3.5" />
+          </div>
+        </div>
+      </div>
+
+      <div class="course-card">
+        <h4 id="courseName">Môn</h4>
+        <h4>Tên môn học</h4>
+        <input type="text" placeholder="VD: Lập trình căn bản" />
+        <div class="course-card-details">
+          <div>
+            <h4>Số tín chỉ</h4>
+            <input type="number" placeholder="VD: 3" />
+          </div>
+          <div>
+            <h4>Điểm (Thang 4)</h4>
+            <input type="number" placeholder="VD: 3.5" />
+          </div>
+        </div>
+      </div>
+
+      <div class="course-card">
+        <h4 id="courseName">Môn</h4>
+        <h4>Tên môn học</h4>
+        <input type="text" placeholder="VD: Lập trình căn bản" />
+        <div class="course-card-details">
+          <div>
+            <h4>Số tín chỉ</h4>
+            <input type="number" placeholder="VD: 3" />
+          </div>
+          <div>
+            <h4>Điểm (Thang 4)</h4>
+            <input type="number" placeholder="VD: 3.5" />
+          </div>
+        </div>
+      </div>
+      <div class="save-button">Lưu & cập nhật điểm số</div>
+      <div class="note">
+        Lưu ý: Điểm được tính dựa trên số tín chỉ và điểm của từng môn học. Công
+        thức: <br />ĐTBTHK = Tổng(Điểm x TC) / Tổng TC
+      </div>
+    </div>
+    <script src="./score-page.js"></script>
+  </body>
+</html>
