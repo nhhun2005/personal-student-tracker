@@ -35,4 +35,4 @@ function updateProgress(score, maxScore) {
 }
 
 //Update điểm tạm thời till have logical
-updateProgress(50, 100);
+updateProgress(1, 5);
