@@ -16,16 +16,21 @@ function addEvent(button) {
   const eventCard = document.createElement("div");
   eventCard.classList.add("event-card");
 
-  eventCard.innerHTML = `
-    <div class="event-title">Sự kiện ${eventCount}</div>
-    <div class="event-actions">
-      <input type="date">
-      <label class="upload-label">
-        📤 Minh chứng
-        <input type="file">
-      </label>
-    </div>
-  `;
+ eventCard.innerHTML = `
+  <div class="event-title">Sự kiện ${eventCount}</div>
+
+  <div class="event-actions">
+    <input type="date">
+
+    <input type="number" class="event-score" placeholder="Điểm" min="0">
+
+    <label class="upload-label">
+      📤 Minh chứng
+      <input type="file">
+    </label>
+  </div>
+`;
+
 
   container.appendChild(eventCard);
 }
