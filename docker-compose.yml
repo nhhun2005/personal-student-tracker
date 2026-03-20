@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mysql:lts
+    container_name: personalstudenttracker_db
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=personal_student_tracker_db
+    volumes:
+      - "./db-data:/var/lib/mysql:Z"
+
+  pma:
+    image: phpmyadmin:latest
+    container_name: personalstudenttracker_pma
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=root
+    depends_on:
+      - db
+  app:
+    build: .
+    container_name: personalstudenttracker_app
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - "./src:/var/www/html:Z"
+    depends_on:
+      - db

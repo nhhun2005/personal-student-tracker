@@ -16,7 +16,7 @@ function addEvent(button) {
   const eventCard = document.createElement("div");
   eventCard.classList.add("event-card");
 
- eventCard.innerHTML = `
+  eventCard.innerHTML = `
   <div class="event-title">Sự kiện ${eventCount}</div>
 
   <div class="event-actions">
