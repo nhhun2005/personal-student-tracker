@@ -2,7 +2,7 @@
 
 ### How to deploy?
 
-- If you are using XAMPP, just change mysql password to "root" instead of "", link src file to xampp and you can skip these step below
+- If you are using XAMPP, just change mysql password to "root" instead of "", (you should change variables in /src/includes/connect-db.php too!) link src file to xampp and you can skip these step below
 - Easier way to deploy:
   - Assuming you have docker installed ( if not please install it ). Use following command in terminal to deploy.
 
