@@ -1,8 +1,6 @@
 const fullname = document.getElementById("fullname");
 fullname.textContent = "Nguyễn Huỳnh Núi";
 
-const studentid = document.getElementById("studentid");
-studentid.textContent = "B2303872";
 
 function toggleAccordion(element) {
   const card = element.parentElement;

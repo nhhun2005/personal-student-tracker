@@ -1,128 +1,91 @@
 <html>
-  <head>
-    <title>Personal Student Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="./css/global-style.css" />
-    <link rel="stylesheet" href="./css/login-page.css" />
+<head>
+  <title>Personal Student Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div class="flex-container">
-      <div class="authentication-container">
-        <svg
-          id="app-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
-          ></path>
-          <path d="M22 10v6"></path>
-          <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path>
-        </svg>
-        <div class="hero">
-          <h2 style="margin-bottom: 2px">Sổ Tay Sinh Viên Cá Nhân</h2>
-          <p style="margin-top: 0px">Personal Student Tracker</p>
-        </div>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="./css/global-style.css" />
+  <link rel="stylesheet" href="./css/login-page.css" />
 
-        <div class="options-container">
-          <div class="option-item is-active">Đăng nhập</div>
-          <div class="option-item">Đăng ký</div>
-        </div>
-        <div id="login-form-container">
-          <form id="login-form">
-            <div class="input-box">
-              <label for="username-input">Tên đăng nhập:</label>
-              <input
-                id="username-input"
-                type="text"
-                name="username"
-                placeholder="Nhập vào tên đăng nhập của bạn."
-              />
-            </div>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet" />
+</head>
 
-            <div class="input-box">
-              <label for="login-password-input">Mật khẩu:</label>
-              <input
-                id="login-password-input"
-                type="password"
-                name="login_password"
-                placeholder="Nhập vào mật khẩu đăng nhập của bạn."
-              />
-            </div>
-            <button type="submit" href="./hub-page.html">Đăng nhập</button>
-          </form>
+<body>
+  <div class="flex-container">
+    <div class="authentication-container">
+      <svg id="app-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z">
+        </path>
+        <path d="M22 10v6"></path>
+        <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path>
+      </svg>
+      <div class="hero">
+        <h2 style="margin-bottom: 2px">Sổ Tay Sinh Viên Cá Nhân</h2>
+        <p style="margin-top: 0px">Personal Student Tracker</p>
+      </div>
 
-          <a id="forget-password-link" href="google.com">Quên mật khẩu?</a>
-        </div>
-        <div id="signup-form-container" class="is-disabled">
-          <form id="signup-form">
-            <div class="input-box">
-              <label for="fullname-input">Họ và tên:</label>
-              <input
-                id="fullname-input"
-                type="text"
-                name="fullname"
-                placeholder="Nguyen Van A..."
-              />
-            </div>
-            <div class="input-box">
-              <label for="studentid-input">MSSV:</label>
-              <input
-                id="studentid-input"
-                type="text"
-                name="studentid"
-                placeholder="B2345678..."
-              />
-            </div>
-            <div class="input-box">
-              <label for="email-input">Email:</label>
-              <input
-                id="email-input"
-                type="email"
-                name="email-input"
-                placeholder="ngoctrinh@example.com"
-              />
-            </div>
-            <div class="input-box">
-              <label for="signup-password-input">Mật khẩu:</label>
-              <input
-                id="signup-password-input"
-                type="password"
-                name="signup_password"
-                placeholder="Nhập vào mật khẩu của bạn."
-              />
-            </div>
-            <div class="input-box">
-              <label for="confirm-signup-password-input"
-                >Xác nhận mật khẩu:</label
-              >
-              <input
-                id="confirm-signup-password-input"
-                type="password"
-                name="confirm_signup_password"
-                placeholder="Xác nhận lại mật khẩu vừa nhập của bạn."
-              />
-            </div>
-            <button type="submit">Đăng ký</button>
-          </form>
-        </div>
+      <div class="options-container">
+        <div class="option-item is-active">Đăng nhập</div>
+        <div class="option-item">Đăng ký</div>
+      </div>
+      <div id="login-form-container">
+        <form id="login-form" method="POST" action="./includes/auth.php">
+          <div class="input-box">
+            <label for="username-input">Tên đăng nhập:</label>
+            <input id="username-input" type="text" name="username" placeholder="Nhập vào tên đăng nhập của bạn." />
+          </div>
+
+          <div class="input-box">
+            <label for="login-password-input">Mật khẩu:</label>
+            <input id="login-password-input" type="password" name="login_password"
+              placeholder="Nhập vào mật khẩu đăng nhập của bạn." />
+          </div>
+          <button type="submit" name="login_submit">Đăng nhập</button>
+        </form>
+
+        <a id="forget-password-link" href="google.com">Quên mật khẩu?</a>
+      </div>
+      <div id="signup-form-container" class="is-disabled">
+        <form id="signup-form" method="POST" action="./includes/auth.php">
+          <div class="input-box">
+            <label for="fullname-input">Họ và tên:</label>
+            <input id="fullname-input" type="text" name="fullname" placeholder="Nguyen Van A..." />
+          </div>
+          <div class="input-box">
+            <label for="username-signup-input">Tên đăng nhập:</label>
+            <input id="username-signup-input" type="text" name="username_signup"
+              placeholder="Chọn tên đăng nhập (vd: teo_nguyen)" required />
+          </div>
+          <div class="input-box">
+            <label for="studentid-input">MSSV:</label>
+            <input id="studentid-input" type="text" name="studentid" placeholder="B2345678..." />
+          </div>
+          <div class="input-box">
+            <label for="email-input">Email:</label>
+            <input id="email-input" type="email" name="email-input" placeholder="ngoctrinh@example.com" />
+          </div>
+          <div class="input-box">
+            <label for="signup-password-input">Mật khẩu:</label>
+            <input id="signup-password-input" type="password" name="signup_password"
+              placeholder="Nhập vào mật khẩu của bạn." />
+          </div>
+          <div class="input-box">
+            <label for="confirm-signup-password-input">Xác nhận mật khẩu:</label>
+            <input id="confirm-signup-password-input" type="password" name="confirm_signup_password"
+              placeholder="Xác nhận lại mật khẩu vừa nhập của bạn." />
+          </div>
+          <button type="submit" name="signup_submit">Đăng ký</button>
+        </form>
       </div>
     </div>
-    <script src="./js/login-page.js"></script>
-  </body>
+  </div>
+  <script src="./js/login-page.js"></script>
+</body>
+
 </html>
