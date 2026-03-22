@@ -1,1 +1,35 @@
+# --- Security & Environment ---
+# TUYỆT ĐỐI không đẩy thông tin bảo mật lên Git
+src/.env
+.env
+*.env.local
+
+# --- Composer (Thư viện) ---
+# Không đẩy vendor vì nó rất nặng, dùng 'composer install' để tải lại
+src/vendor/
+composer.phar
+
+# --- Database Data ---
+# Bỏ qua dữ liệu thực tế của MySQL để tránh xung đột và lộ dữ liệu
 db-data/
+
+# --- OS & IDE Rác ---
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+# Linux (Bazzite/Fedora)
+*~
+.fuse_hidden*
+.directory
+.trash/
+
+# IDEs (VS Code, JetBrains)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Docker & Logs ---
+*.log
+docker-compose.override.yml

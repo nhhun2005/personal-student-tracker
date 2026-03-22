@@ -49,7 +49,7 @@
           <button type="submit" name="login_submit">Đăng nhập</button>
         </form>
 
-        <a id="forget-password-link" href="google.com">Quên mật khẩu?</a>
+        <a id="forget-password-link" href="forgot-password-page.php">Quên mật khẩu?</a>
       </div>
       <div id="signup-form-container" class="is-disabled">
         <form id="signup-form" method="POST" action="./includes/auth.php">

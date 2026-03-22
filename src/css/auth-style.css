@@ -1,0 +1,161 @@
+/* Reset & Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Readex Pro', 'Ubuntu', sans-serif;
+}
+
+body {
+  background: radial-gradient(circle, #1d71bb, #134a7a);
+  min-height: 100vh;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Container chính */
+.authentication-container {
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 450px;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* Icon App */
+#app-icon {
+  height: 80px;
+  width: 80px;
+  background: radial-gradient(circle, #048aff, #1d71bb);
+  stroke: white;
+  padding: 20px;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hero h2 {
+  color: #1a1a1a;
+  font-size: 1.5rem;
+}
+
+.hero p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Form & Inputs */
+form {
+  width: 100%;
+}
+
+.input-box {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.input-box label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.input-box input {
+  background: #f3f3f5;
+  border: 2px solid transparent;
+  padding: 12px 16px;
+  border-radius: 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-box input:focus {
+  border-color: #1d71bb;
+}
+
+/* Buttons */
+button[type="submit"], 
+.submit-btn-link {
+  border: none;
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: #1d71bb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+button[type="submit"]:hover {
+  background: #134a7a;
+}
+
+/* Link điều hướng */
+.back-link {
+  margin-top: 1.5rem;
+  color: #1d71bb;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Trạng thái lỗi & Thành công */
+.status-msg {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.error-msg {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.success-step {
+  text-align: center;
+  width: 100%;
+}
+
+.success-icon-container {
+  color: #22c55e;
+  margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .authentication-container {
+    padding: 2rem 1.5rem;
+  }
+}
