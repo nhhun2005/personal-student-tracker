@@ -1,17 +1,36 @@
 # Personal Student Tracker
 
-### How to deploy?
+## How to deploy?
 
-- If you are using XAMPP, just change mysql password to "root" instead of "", (you should change variables in /src/includes/connect-db.php too!) link src file to xampp and you can skip these step below
-- Easier way to deploy:
-  - Assuming you have docker installed ( if not please install it ). Use following command in terminal to deploy.
+### Option 1: Using Docker (Recommended)
+This is the fastest way to get the app running with all dependencies pre-configured.
 
-        docker compose up -d
+1.  **Install dependencies:** Run the following command to download PHP libraries (Resend SDK, Dotenv, etc.):
+    ```bash
+    docker run --rm -v $(pwd)/src:/app composer install
+    ```
 
-  - To use the app, enter following url to your browser:
+2.  **Environment Setup:** - Copy `.env.example` to `.env` inside the `src/` folder.
+    - Fill in your `RESEND_API_KEY`.
 
-        http://localhost:8080/
+3.  **Spin up the containers:**
+    ```bash
+    docker compose up -d
+    ```
 
-    Also, the phpAdmin is on port 8081:
+4.  **Access the App:**
+    - Web App: [http://localhost:8080/](http://localhost:8080/)
+    - phpMyAdmin: [http://localhost:8081/](http://localhost:8081/)
 
-        http://localhost:8081/
+---
+
+### Option 2: Using XAMPP (Manual)
+1.  **Install Composer:** Ensure you have [Composer](https://getcomposer.org/) installed on your machine.
+2.  **Install PHP Libraries:** Open terminal in the `src/` directory and run:
+    ```bash
+    composer install
+    ```
+3.  **Database Config:** - Import the SQL file (if provided) into your MySQL via phpMyAdmin.
+    - Change the MySQL password to `root` (or your current password).
+    - Update connection variables in `src/includes/connect-db.php` and your `.env` file.
+4.  **Run:** Move the `src/` content to your `htdocs` folder and access via `http://localhost/`.
