@@ -1,0 +1,23 @@
+1. Tables Definition
+
+    users: id (PK, int), username, password, full_name, student_id, email, reset_token, reset_expire (int)
+
+    semesters: id (PK, int), semester_name, user_id (FK)
+
+    courses: id (PK, int), course_name, credits (int), score (decimal), semester_id (FK)
+
+    criterions: id (PK, int), criterion_name, max_score (int), type (varchar)
+
+    evidences: id (PK, int), content (LONGBLOB/path), score_value (decimal), event_date (date), criterion_id (FK), user_id (FK), semester_id (FK)
+
+2. Relationships (ER)
+
+    users (1) ↔ (N) semesters
+
+    semesters (1) ↔ (N) courses
+
+    semesters (1) ↔ (N) evidences
+
+    users (1) ↔ (N) evidences
+
+    criterions (1) ↔ (N) evidences

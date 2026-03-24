@@ -233,3 +233,36 @@ header {
 
   margin: 40px auto;   /* căn giữa */
 }
+.semester-filter {
+      width: 40%;
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .semester-filter label {
+      font-size: 14px;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .semester-filter select {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 14px;
+      color: #1f2937;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .semester-filter select:focus {
+      border-color: #3b82f6;
+    }
