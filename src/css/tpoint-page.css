@@ -7,7 +7,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: radial-gradient(circle, #1d71bb, #134a7a);
+  background: #f9fafb; /* Nền ngoài cùng xám nhạt/trắng */
   min-height: 100vh;
 }
 
@@ -24,27 +24,32 @@ body {
   max-width: 800px;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Bóng mờ nhẹ nhàng */
 }
 
+/* Header Banner */
 header {
   text-align: center;
   margin-bottom: 2rem;
   position: relative;
+  background: radial-gradient(circle, #0759a0, #1d71bb); /* Trở lại màu xanh gradient chuẩn */
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(29, 113, 187, 0.2);
 }
 
 .header-exit-icon {
   position: absolute;
-  left: 0;
-  top: 10px;
-  stroke: #4a5565;
+  left: 20px;
+  top: 20px;
+  stroke: white; /* Đổi thành trắng để nổi trên nền xanh */
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .header-exit-icon:hover {
   transform: scale(1.1);
-  stroke: #1d71bb;
+  stroke-width: 3px;
 }
 
 .app-icon-wrapper {
@@ -52,27 +57,39 @@ header {
   margin-bottom: 10px;
 }
 
-header h2 { color: #1d71bb; margin: 0 0 5px 0; font-size: 1.5rem; }
-header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
+#app-icon {
+  height: 48px;
+  width: 48px;
+  background: white;
+  stroke: #1d71bb;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-/* Alert */
+header h2 { color: white; margin: 0 0 5px 0; font-size: 1.5rem; }
+header p { color: #e0f2fe; margin: 0; font-size: 0.9rem; }
+
+/* Alert (Thông báo lưu thành công) */
 .alert-success {
-  background: #dcfce7;
-  color: #166534;
+  background: #e0f2fe; /* Xanh lam nhạt */
+  color: #0369a1; /* Chữ xanh lam đậm */
   padding: 15px;
   text-align: center;
   border-radius: 12px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #bae6fd;
   margin-bottom: 1.5rem;
   font-weight: bold;
 }
 
 /* TPoint Card (Info) */
 .tpoint-card {
-  background: #f3f4f6;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .student-info-grid {
@@ -84,17 +101,17 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   border-bottom: 1px solid #e5e7eb;
 }
 
-.student-info-grid .label { color: #6b7280; font-size: 0.8rem; margin: 0 0 4px 0; }
+.student-info-grid .label { color: #6b7280; font-size: 0.8rem; margin: 0 0 4px 0; font-weight: bold;}
 .student-info-grid h3 { color: #1f2937; margin: 0; font-size: 1.1rem; }
 
 .score-display { text-align: center; }
 .score-display p { margin: 0; color: #4a5565; }
-.score-display h2 { margin: 10px 0; color: #1d71bb; font-size: 2rem; }
+.score-display h2 { margin: 10px 0; color: #1d71bb; font-size: 2.5rem; }
 
 .progress-bar {
   width: 100%;
   height: 10px;
-  background: #e5e7eb;
+  background: #f3f4f6;
   border-radius: 5px;
   overflow: hidden;
 }
@@ -112,10 +129,14 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   align-items: center;
   gap: 10px;
   margin-bottom: 1.5rem;
-  background: #f9fafb;
+  background: #ffffff;
   padding: 1rem;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #1d71bb; /* Đổi viền sang xanh lam */
+}
+.semester-filter label {
+  color: #1d71bb;
+  font-weight: bold;
 }
 
 .semester-filter select {
@@ -125,6 +146,11 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   border: 1px solid #d1d5db;
   outline: none;
   font-family: inherit;
+  color: #1f2937;
+  font-weight: 500;
+}
+.semester-filter select:focus {
+  border-color: #1d71bb;
 }
 
 /* Accordion */
@@ -133,13 +159,16 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   border-radius: 12px;
   margin-bottom: 1rem;
   overflow: hidden;
-  transition: box-shadow 0.3s;
+  transition: all 0.3s;
+  background: #ffffff;
 }
 
-.accordion-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+.accordion-card:hover { 
+  border-color: #93c5fd; 
+  box-shadow: 0 4px 10px rgba(29, 113, 187, 0.05); 
+}
 
 .accordion-header {
-  background: #ffffff;
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -151,15 +180,25 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
 .header-left { display: flex; align-items: center; gap: 10px; }
 .header-left h3 { margin: 0; font-size: 1rem; color: #1f2937; }
 .header-right { display: flex; align-items: center; gap: 15px; }
-.section-score-display { font-weight: bold; color: #1d71bb; background: #eff6ff; padding: 4px 10px; border-radius: 20px; font-size: 0.9rem; }
-.arrow { font-size: 1.2rem; transition: transform 0.3s; color: #6b7280; }
+.section-score-display { 
+  font-weight: bold; 
+  color: #1d71bb; 
+  background: #eff6ff; 
+  padding: 4px 12px; 
+  border-radius: 20px; 
+  font-size: 0.9rem; 
+  border: 1px solid #bfdbfe;
+}
+.arrow { font-size: 1.2rem; transition: transform 0.3s; color: #1d71bb; font-weight: bold;}
 
 .accordion-card.active .arrow { transform: rotate(180deg); }
-.accordion-content { display: none; background: #f9fafb; padding: 1.5rem; border-top: 1px solid #e5e7eb; }
+.accordion-content { display: none; background: #ffffff; padding: 1.5rem; border-top: 1px dashed #e5e7eb; }
 .accordion-card.active .accordion-content { display: block; }
 
 /* Criterions */
-.criterion-block { margin-bottom: 1.5rem; }
+.criterion-block { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6;}
+.criterion-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
 .criterion-row {
   display: flex;
   justify-content: space-between;
@@ -168,18 +207,43 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   color: #374151;
   margin-bottom: 10px;
 }
-.badge { background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
+/* Đổi badge từ đỏ sang xanh lam */
+.badge { 
+  background: #eff6ff; 
+  color: #1d71bb; 
+  padding: 4px 10px; 
+  border-radius: 6px; 
+  font-size: 0.8rem; 
+  border: 1px solid #bfdbfe;
+  font-weight: bold;
+}
 
 /* Events */
 .event-card {
-  background: white;
-  border: 1px dashed #d1d5db;
+  background: #f9fafb;
+  border: 1px dashed #cbd5e1;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 10px;
+  transition: all 0.2s;
 }
-.event-card.saved { border: 1px solid #10b981; border-left: 4px solid #10b981; }
-.event-title { font-size: 0.85rem; color: #6b7280; margin-bottom: 8px; }
+.event-card:hover { border-color: #93c5fd; }
+
+/* Đổi thẻ đã lưu từ xanh lá sang xanh lam đồng bộ */
+.event-card.saved { 
+  background: #eff6ff;
+  border: 1px solid #93c5fd; 
+  border-left: 4px solid #1d71bb; 
+}
+.saved-label {
+  color: #1d71bb;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.event-title { font-size: 0.85rem; color: #6b7280; margin-bottom: 8px; font-weight: bold; }
 .event-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
 .event-actions input[type="date"], .event-actions input[type="number"] {
@@ -188,13 +252,15 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-family: inherit;
+  color: #1f2937;
 }
+.event-actions input:focus { border-color: #1d71bb; outline: none; box-shadow: 0 0 0 2px rgba(29, 113, 187, 0.1); }
 
 .upload-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f3f4f6;
+  background: #ffffff;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   color: #4a5565;
@@ -202,14 +268,16 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   font-size: 0.85rem;
   padding: 8px;
   text-align: center;
+  transition: all 0.2s;
+  font-weight: 500;
 }
 .upload-label input[type="file"] { display: none; }
-.upload-label:hover { background: #e5e7eb; }
+.upload-label:hover { background: #f3f4f6; border-color: #9ca3af; }
 
 .add-event-btn {
   text-align: center;
   padding: 10px;
-  background: #eff6ff;
+  background: #ffffff;
   color: #1d71bb;
   border-radius: 8px;
   font-weight: bold;
@@ -217,7 +285,7 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   border: 1px dashed #93c5fd;
   transition: all 0.2s;
 }
-.add-event-btn:hover { background: #dbeafe; }
+.add-event-btn:hover { background: #eff6ff; border-color: #1d71bb; }
 
 .submit-btn {
   width: 100%;
@@ -230,6 +298,10 @@ header p { color: #6b7280; margin: 0; font-size: 0.9rem; }
   font-size: 1.1rem;
   cursor: pointer;
   margin-top: 2rem;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.submit-btn:hover { background: #134a7a; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(29, 113, 187, 0.3); }
+.submit-btn:hover { 
+  background: #134a7a; 
+  transform: translateY(-2px); 
+  box-shadow: 0 4px 12px rgba(29, 113, 187, 0.3); 
+}

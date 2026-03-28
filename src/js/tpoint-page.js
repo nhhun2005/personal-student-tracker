@@ -94,11 +94,11 @@ function checkAllAddButtons() {
             if (isSectionFull) {
                 addButton.style.pointerEvents = "none";
                 addButton.style.opacity = "0.5";
-                addButton.innerText = `❌ Mục ${sectionKey} đầy điểm`;
+                addButton.innerText = `Mục ${sectionKey} đã đủ điểm`;
             } else if (critTotal >= maxCritAllowed) {
                 addButton.style.pointerEvents = "none";
                 addButton.style.opacity = "0.5";
-                addButton.innerText = "❌ Tiêu chí đầy";
+                addButton.innerText = "Tiêu chí này đã đủ điểm";
             } else {
                 addButton.style.pointerEvents = "auto";
                 addButton.style.opacity = "1";
@@ -149,10 +149,10 @@ function renderSavedEvent(container, data) {
         ${hasEvidence ?
             `<a href="./includes/view-evidence.php?id=${data.id}" target="_blank" class="upload-label" 
               style="background:#e0f2fe; border:1px solid #7dd3fc; text-decoration:none; color:#0369a1;">
-              🔍 Xem File
+              Xem minh chứng
            </a>` :
             `<span class="upload-label" style="background:#f3f4f6; color:#9ca3af; cursor:not-allowed;">
-              🚫 Trống
+              Không có minh chứng
            </span>`
         }
       </div>
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 const btn = document.querySelector('.submit-btn');
                 if (btn) {
-                    btn.innerHTML = "⌛ Đang xử lý...";
+                    btn.innerHTML = "Đang xử lý...";
                     btn.style.opacity = "0.7";
                     btn.style.pointerEvents = "none";
                 }

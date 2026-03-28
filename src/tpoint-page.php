@@ -56,7 +56,7 @@ $max_score = 100;
 
       <?php if (isset($_GET['msg']) && $_GET['msg'] == 'saved'): ?>
         <div class="alert-success">
-          🎉 Dữ liệu đã được lưu thành công!
+          Lưu dữ liệu môn học thành công!
         </div>
       <?php endif; ?>
 
@@ -82,7 +82,8 @@ $max_score = 100;
               <div class="progress-fill" id="progressFill"></div>
             </div>
             <p style="margin-top: 10px; font-weight: bold; color: #1d71bb;">Xếp loại:
-              <?php echo $data['classification']; ?></p>
+              <?php echo $data['classification']; ?>
+            </p>
           </div>
         </div>
 
@@ -104,7 +105,6 @@ $max_score = 100;
         <div class="accordion-card" data-section="I">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="header-left">
-              <span class="icon">📘</span>
               <h3>I. Đánh giá về ý thức tham gia học tập</h3>
             </div>
             <div class="header-right">
@@ -114,24 +114,29 @@ $max_score = 100;
           </div>
           <div class="accordion-content">
             <div class="criterion-block" data-criterion-id="1">
-              <div class="criterion-row"><span>I.a Ý thức và thái độ học tập</span><span class="badge">6 điểm</span>
+              <div class="criterion-row"><span>I.a Ý thức và thái độ trong học tập.</span><span class="badge">6
+                  điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 1)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="2">
-              <div class="criterion-row"><span>I.b Tham gia CLB, NCKH</span><span class="badge">10 điểm</span></div>
+              <div class="criterion-row"><span>I.b Ý thức và thái độ tham gia các câu lạc bộ học thuật, các hoạt động
+                  học thuật, hoạt động ngoại khóa, hoạt động nghiên cứu khoa học.</span><span class="badge">10
+                  điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 2)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="3">
-              <div class="criterion-row"><span>I.c Tham gia kỳ thi, cuộc thi</span><span class="badge">6 điểm</span>
+              <div class="criterion-row"><span>I.c Ý thức và thái độ tham gia các kỳ thi, cuộc thi.</span><span
+                  class="badge">6 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 3)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="4">
-              <div class="criterion-row"><span>I.d Tinh thần vượt khó</span><span class="badge">2 điểm</span></div>
+              <div class="criterion-row"><span>I.d Tinh thần vượt khó, phấn đấu vươn lên trong học tập.</span><span
+                  class="badge">2 điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 4)">+ Thêm sự kiện</div>
             </div>
@@ -147,8 +152,7 @@ $max_score = 100;
         <div class="accordion-card" data-section="II">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="header-left">
-              <span class="icon">📗</span>
-              <h3>II. Ý thức chấp hành nội quy</h3>
+              <h3>II. Đánh giá về ý thức và kết quả chấp hành nội quy, quy chế, quy định trong nhà trường</h3>
             </div>
             <div class="header-right">
               <span class="section-score-display"><?php echo $section_scores[2]; ?>/25</span>
@@ -157,13 +161,15 @@ $max_score = 100;
           </div>
           <div class="accordion-content">
             <div class="criterion-block" data-criterion-id="6">
-              <div class="criterion-row"><span>II.a Chấp hành văn bản chỉ đạo</span><span class="badge">15 điểm</span>
+              <div class="criterion-row"><span>II.a Ý thức chấp hành các văn bản chỉ đạo của ngành, của cơ quan chỉ đạo
+                  cấp trên được thực hiện trong nhà trường.</span><span class="badge">15 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 6)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="7">
-              <div class="criterion-row"><span>II.b Chấp hành nội quy, quy chế</span><span class="badge">10 điểm</span>
+              <div class="criterion-row"><span>II.b Ý thức chấp hành các nội quy, quy chế và các quy định khác được áp
+                  dụng trong nhà trường.</span><span class="badge">10 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 7)">+ Thêm sự kiện</div>
@@ -175,8 +181,8 @@ $max_score = 100;
         <div class="accordion-card" data-section="III">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="header-left">
-              <span class="icon">📙</span>
-              <h3>III. Ý thức tham gia CT-XH, thể thao</h3>
+              <h3>III. Đánh giá về ý thức tham gia các hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng
+                chống tội phạm và các tệ nạn xã hội </h3>
             </div>
             <div class="header-right">
               <span class="section-score-display"><?php echo $section_scores[3]; ?>/20</span>
@@ -185,19 +191,22 @@ $max_score = 100;
           </div>
           <div class="accordion-content">
             <div class="criterion-block" data-criterion-id="8">
-              <div class="criterion-row"><span>III.a Rèn luyện chính trị, VH-TT</span><span class="badge">15 điểm</span>
+              <div class="criterion-row"><span>III.a Ý thức và hiệu quả tham gia các hoạt động rèn luyện về chính trị,
+                  xã hội, văn hóa, văn nghệ, thể thao.</span><span class="badge">15 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 8)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="9">
-              <div class="criterion-row"><span>III.b Hoạt động công ích, tình nguyện</span><span class="badge">5
+              <div class="criterion-row"><span>III.b Ý thức tham gia các hoạt động công ích tình nguyện, công tác xã
+                  hội.</span><span class="badge">5
                   điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 9)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="10">
-              <div class="criterion-row"><span>III.c Phòng chống tội phạm, tệ nạn</span><span class="badge">10
+              <div class="criterion-row"><span>III.c Tham gia tuyên truyền, phòng chống tội phạm và các tệ nạn xã
+                  hội.</span><span class="badge">10
                   điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 10)">+ Thêm sự kiện</div>
@@ -209,8 +218,7 @@ $max_score = 100;
         <div class="accordion-card" data-section="IV">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="header-left">
-              <span class="icon">📕</span>
-              <h3>IV. Đánh giá về ý thức công dân</h3>
+              <h3>IV. Đánh giá về ý thức công dân trong quan hệ cộng đồng </h3>
             </div>
             <div class="header-right">
               <span class="section-score-display"><?php echo $section_scores[4]; ?>/25</span>
@@ -219,19 +227,22 @@ $max_score = 100;
           </div>
           <div class="accordion-content">
             <div class="criterion-block" data-criterion-id="11">
-              <div class="criterion-row"><span>IV.a Chấp hành chủ trương của Đảng</span><span class="badge">15
+              <div class="criterion-row"><span>IV.a Ý thức chấp hành và tham gia tuyên truyền các chủ trương của Đảng,
+                  chính sách, pháp luật của Nhà nước trong cộng đồng.</span><span class="badge">15
                   điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 11)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="12">
-              <div class="criterion-row"><span>IV.b Thành tích trong hoạt động xã hội</span><span class="badge">10
+              <div class="criterion-row"><span>IV.b Ý thức tham gia các hoạt động xã hội có thành tích được ghi nhận,
+                  biểu dương, khen thưởng.</span><span class="badge">10
                   điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 12)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="13">
-              <div class="criterion-row"><span>IV.c Giúp đỡ người khó khăn</span><span class="badge">5 điểm</span></div>
+              <div class="criterion-row"><span>IV.c Có tinh thần chia sẻ, giúp đỡ người thân, người có khó khăn, hoạn
+                  nạn.</span><span class="badge">5 điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 13)">+ Thêm sự kiện</div>
             </div>
@@ -242,8 +253,8 @@ $max_score = 100;
         <div class="accordion-card" data-section="V">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="header-left">
-              <span class="icon">🏅</span>
-              <h3>V. Cán bộ lớp, đoàn thể</h3>
+              <h3>V. Đánh giá về ý thức và kết quả khi tham gia công tác cán bộ lớp, các đoàn thể, tổ chức trong nhà
+                trường hoặc người học đạt được thành tích đặc biệt trong học tập, rèn luyện</h3>
             </div>
             <div class="header-right">
               <span class="section-score-display"><?php echo $section_scores[5]; ?>/10</span>
@@ -252,24 +263,30 @@ $max_score = 100;
           </div>
           <div class="accordion-content">
             <div class="criterion-block" data-criterion-id="14">
-              <div class="criterion-row"><span>V.a Hiệu quả công việc cán bộ</span><span class="badge">10 điểm</span>
+              <div class="criterion-row"><span>V.a Ý thức, tinh thần thái độ, uy tín và hiệu quả công việc của người học
+                  được phân công nhiệm vụ quản lý lớp, các tổ chức Đảng, Đoàn thanh niên, Hội sinh viên và các tổ chức
+                  khác trong nhà trường.</span><span class="badge">10 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 14)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="15">
-              <div class="criterion-row"><span>V.b Kỹ năng tổ chức</span><span class="badge">9 điểm</span></div>
+              <div class="criterion-row"><span>V.b Kỹ năng tổ chức, quản lý lớp, quản lý các tổ chức Đảng, Đoàn thanh
+                  niên, Hội sinh viên và các tổ chức khác trong nhà trường.</span><span class="badge">9 điểm</span>
+              </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 15)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="16">
-              <div class="criterion-row"><span>V.c Hỗ trợ tham gia tích cực</span><span class="badge">8 điểm</span>
+              <div class="criterion-row"><span>V.c Hỗ trợ và tham gia tích cực vào các hoạt động chung của lớp, tập thể,
+                  khoa và nhà trường.</span><span class="badge">8 điểm</span>
               </div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 16)">+ Thêm sự kiện</div>
             </div>
             <div class="criterion-block" data-criterion-id="17">
-              <div class="criterion-row"><span>V.d Thành tích đặc biệt</span><span class="badge">8 điểm</span></div>
+              <div class="criterion-row"><span>V.d Người học đạt được các thành tích đặc biệt trong học tập, rèn
+                  luyện.</span><span class="badge">8 điểm</span></div>
               <div class="event-container"></div>
               <div class="add-event-btn" onclick="addEvent(this, 17)">+ Thêm sự kiện</div>
             </div>
