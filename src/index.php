@@ -30,29 +30,61 @@
         <p style="margin-top: 0px">Personal Student Tracker</p>
       </div>
 
+      <?php if (isset($_GET['error'])): ?>
+        <div style="color: #ff4d4d; margin-bottom: 15px; font-size: 14px; text-align: center;">
+          <?php
+          switch ($_GET['error']) {
+            case 'invalid_credentials':
+              echo "Sai tài khoản hoặc mật khẩu.";
+              break;
+            case 'user_exists':
+              echo "Tên đăng nhập hoặc Email đã tồn tại.";
+              break;
+            case 'password_mismatch':
+              echo "Mật khẩu xác nhận không khớp.";
+              break;
+            case 'failed':
+              echo "Có lỗi xảy ra, vui lòng thử lại.";
+              break;
+            default:
+              echo "Lỗi không xác định.";
+          }
+          ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if (isset($_GET['success'])): ?>
+        <div style="color: #2ecc71; margin-bottom: 15px; font-size: 14px; text-align: center;">
+          Đăng ký thành công! Vui lòng đăng nhập.
+        </div>
+      <?php endif; ?>
+
       <div class="options-container">
         <div class="option-item is-active">Đăng nhập</div>
         <div class="option-item">Đăng ký</div>
       </div>
+
       <div id="login-form-container">
-        <form id="login-form" method="POST" action="./includes/auth.php">
+        <form id="login-form" method="POST" action="./services/UserService.php">
           <div class="input-box">
             <label for="username-input">Tên đăng nhập:</label>
-            <input id="username-input" type="text" name="username" placeholder="Nhập vào tên đăng nhập của bạn." />
+            <input id="username-input" type="text" name="username" placeholder="Nhập vào tên đăng nhập của bạn."
+              required />
           </div>
 
           <div class="input-box">
             <label for="login-password-input">Mật khẩu:</label>
             <input id="login-password-input" type="password" name="login_password"
-              placeholder="Nhập vào mật khẩu đăng nhập của bạn." />
+              placeholder="Nhập vào mật khẩu đăng nhập của bạn." required />
           </div>
           <button type="submit" name="login_submit">Đăng nhập</button>
         </form>
 
         <a id="forget-password-link" href="forgot-password-page.php">Quên mật khẩu?</a>
       </div>
+
       <div id="signup-form-container" class="is-disabled">
-        <form id="signup-form" method="POST" action="./includes/auth.php">
+        <form id="signup-form" method="POST" action="./services/UserService.php">
           <div class="input-box">
             <label for="fullname-input">Họ và tên:</label>
             <input id="fullname-input" type="text" name="fullname" placeholder="Nguyen Van A..." />
@@ -73,12 +105,12 @@
           <div class="input-box">
             <label for="signup-password-input">Mật khẩu:</label>
             <input id="signup-password-input" type="password" name="signup_password"
-              placeholder="Nhập vào mật khẩu của bạn." />
+              placeholder="Nhập vào mật khẩu của bạn." required />
           </div>
           <div class="input-box">
             <label for="confirm-signup-password-input">Xác nhận mật khẩu:</label>
             <input id="confirm-signup-password-input" type="password" name="confirm_signup_password"
-              placeholder="Xác nhận lại mật khẩu vừa nhập của bạn." />
+              placeholder="Xác nhận lại mật khẩu vừa nhập của bạn." required />
           </div>
           <button type="submit" name="signup_submit">Đăng ký</button>
         </form>

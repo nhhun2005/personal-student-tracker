@@ -1,24 +1,5 @@
 <?php
-session_start();
-require_once './includes/connect-db.php';
-
-if (!isset($_SESSION['user_id'])) {
-  header("Location: index.php");
-  exit();
-}
-
-$user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT full_name, student_id FROM users WHERE id = ? LIMIT 1");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-
-if (!$user) {
-  session_destroy();
-  header("Location: index.php");
-  exit();
-}
+require_once './includes/process-hub.php';
 ?>
 
 <!DOCTYPE html>
@@ -29,15 +10,7 @@ if (!$user) {
   <title>Personal Student Tracker - Hub</title>
   <link rel="stylesheet" href="./css/global-style.css" />
   <link rel="stylesheet" href="./css/hub-page.css" />
-  <style>
-    /* Sửa lỗi hiển thị mặc định của thẻ <a> để không bị đổi màu chữ */
-    a.feature-card {
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      /* Giữ layout flex của card cũ */
-    }
-  </style>
+
 </head>
 
 <body>

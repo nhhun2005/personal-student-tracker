@@ -266,3 +266,44 @@ header {
     .semester-filter select:focus {
       border-color: #3b82f6;
     }
+
+    .semester-filter {
+      width: 40%;
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .semester-filter select {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .file-name-display {
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      color: #6b7280;
+      word-break: break-all;
+    }
+
+    .event-card.saved {
+      border-left: 4px solid #10b981;
+      background: #f0fdf4;
+    }
+
+    .saved-label {
+      color: #10b981;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }

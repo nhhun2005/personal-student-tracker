@@ -1,6 +1,6 @@
 1. Tables Definition
 
-    users: id (PK, int), username, password, full_name, student_id, email, reset_token, reset_expire (int)
+    users: id (PK, int), username, password, full_name, student_id, email, reset_token, reset_expire (datetime)
 
     semesters: id (PK, int), semester_name, user_id (FK)
 

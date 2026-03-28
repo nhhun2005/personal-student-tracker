@@ -6,14 +6,13 @@ const forms = document.querySelectorAll(
 
 tabs.forEach((tab, index) => {
   tab.addEventListener("click", function () {
-    // A. Xử lý phần Tab (nổi bật nút được chọn)
+    //bat tat class cho nut duoc chon
     tabs.forEach((t) => t.classList.remove("is-active"));
     this.classList.add("is-active");
 
-    // B. Xử lý phần Form (ẩn hết, hiện cái tương ứng)
+    //bat tat class cho nut duoc chon
     forms.forEach((frm) => frm.classList.add("is-disabled"));
     forms[index].classList.remove("is-disabled");
 
-    // Giải thích: Nếu bấm Tab số 0 (Đăng nhập) -> Hiện Form số 0
   });
 });

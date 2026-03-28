@@ -78,3 +78,8 @@ header p {
 #guide-text {
   color: gray;
 }
+a.feature-card  {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+}

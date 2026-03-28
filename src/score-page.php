@@ -1,109 +1,52 @@
 <?php
 session_start();
-require_once __DIR__ . '/includes/env-loader.php';
-require_once __DIR__ . '/includes/connect-db.php';
+// Nạp ScoreService
+require_once __DIR__ . '/services/ScoreService.php';
 
 if (!isset($_SESSION['user_id'])) {
   header("Location: index.php");
   exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$selected_semester = $_GET['semester'] ?? 'HK2 2025-2026';
+$scoreService = new ScoreService();
+
+// Lấy dữ liệu để hiển thị (Logic GET bình thường)
+$data = $scoreService->getScorePageData($_SESSION['user_id'], $_GET);
+
+$selected_semester = $data['semester'];
 $is_all_mode = ($selected_semester === 'Tất cả');
+$final_score = $data['gpa'];
+$total_pages = $data['total_pages'];
+$current_page = $data['current_page'];
 
-// Search & Sort parameters
-$search_name = $_GET['q'] ?? '';
-$search_credit = (isset($_GET['c']) && $_GET['c'] !== '') ? intval($_GET['c']) : null;
-$sort_by = in_array($_GET['sort'] ?? '', ['score', 'credits']) ? $_GET['sort'] : 'c.id';
-$sort_order = strtoupper($_GET['order'] ?? '') === 'ASC' ? 'ASC' : 'DESC';
+// Map lại dữ liệu môn học
+$display_courses = array_map(function ($c) {
+  return [
+    'name' => $c['course_name'] ?? '',
+    'credits' => $c['credits'] ?? 0,
+    'score' => $c['score'] ?? 0
+  ];
+}, $data['courses']);
 
-// Pagination
+$all_data = $display_courses;
+
+// Lấy thông tin sinh viên từ session
+$u_info = [
+  'full_name' => $_SESSION['full_name'] ?? 'Sinh viên',
+  'student_id' => $_SESSION['student_id'] ?? 'N/A'
+];
+
 $items_per_page = 5;
-$current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
-// Where Clauses
-$where_clauses = ["s.user_id = ?"];
-$params = [$user_id];
-$types = "i";
-if (!$is_all_mode) {
-  $where_clauses[] = "s.semester_name = ?";
-  $params[] = $selected_semester;
-  $types .= "s";
-}
-if (!empty($search_name)) {
-  $where_clauses[] = "c.course_name LIKE ?";
-  $params[] = "%$search_name%";
-  $types .= "s";
-}
-if ($search_credit !== null) {
-  $where_clauses[] = "c.credits = ?";
-  $params[] = $search_credit;
-  $types .= "i";
-}
-$where_sql = " WHERE " . implode(" AND ", $where_clauses);
-
-// Tính GPA & Phân trang (Prepared Statements)
-$stmt_gpa = $conn->prepare("SELECT c.credits, c.score FROM courses c JOIN semesters s ON c.semester_id = s.id $where_sql");
-$stmt_gpa->bind_param($types, ...$params);
-$stmt_gpa->execute();
-$all_data = $stmt_gpa->get_result()->fetch_all(MYSQLI_ASSOC);
-$pts = 0;
-$cre = 0;
-foreach ($all_data as $r) {
-  $pts += ($r['credits'] * $r['score']);
-  $cre += $r['credits'];
-}
-$final_score = $cre > 0 ? round($pts / $cre, 2) : 0;
-
-$count_stmt = $conn->prepare("SELECT COUNT(*) as total FROM courses c JOIN semesters s ON c.semester_id = s.id $where_sql");
-$count_stmt->bind_param($types, ...$params);
-$count_stmt->execute();
-$total_items = $count_stmt->get_result()->fetch_assoc()['total'];
-$total_pages = max(1, ceil($total_items / $items_per_page));
-
-$display_sql = "SELECT c.course_name as name, c.credits, c.score FROM courses c JOIN semesters s ON c.semester_id = s.id $where_sql ORDER BY $sort_by $sort_order LIMIT ? OFFSET ?";
-$stmt_disp = $conn->prepare($display_sql);
-$stmt_disp->bind_param($types . "ii", ...array_merge($params, [$items_per_page, $offset]));
-$stmt_disp->execute();
-$display_courses = $stmt_disp->get_result()->fetch_all(MYSQLI_ASSOC);
-
-// Post logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_score']) && !$is_all_mode) {
-  $names = $_POST['c_name'] ?? [];
-  $creds = $_POST['c_credit'] ?? [];
-  $scos = $_POST['c_score'] ?? [];
-  $conn->begin_transaction();
-  try {
-    $del = $conn->prepare("DELETE FROM semesters WHERE user_id = ? AND semester_name = ?");
-    $del->bind_param("is", $user_id, $selected_semester);
-    $del->execute();
-    $ins_s = $conn->prepare("INSERT INTO semesters (user_id, semester_name) VALUES (?, ?)");
-    $ins_s->bind_param("is", $user_id, $selected_semester);
-    $ins_s->execute();
-    $s_id = $conn->insert_id;
-    $ins_c = $conn->prepare("INSERT INTO courses (semester_id, course_name, credits, score) VALUES (?, ?, ?, ?)");
-    foreach ($names as $i => $n) {
-      $nm = trim($n);
-      if (empty($nm))
-        continue;
-      $ins_c->bind_param("isid", $s_id, $nm, $creds[$i], $scos[$i]);
-      $ins_c->execute();
-    }
-    $conn->commit();
-    header("Location: score-page.php?semester=" . urlencode($selected_semester));
-    exit();
-  } catch (Exception $e) {
-    $conn->rollback();
-  }
-}
-
-$u_info = $conn->query("SELECT full_name, student_id FROM users WHERE id = $user_id")->fetch_assoc();
 function build_url($p)
 {
-  global $selected_semester, $search_name, $search_credit, $sort_by, $sort_order;
-  return "score-page.php?semester=" . urlencode($selected_semester) . "&page=$p&q=" . urlencode($search_name) . "&c=$search_credit&sort=$sort_by&order=$sort_order";
+  global $selected_semester;
+  $q = $_GET['q'] ?? '';
+  $c = $_GET['c'] ?? '';
+  $sort = $_GET['sort'] ?? 'c.id';
+  $order = $_GET['order'] ?? 'DESC';
+  return "score-page.php?semester=" . urlencode($selected_semester) . "&page=$p&q=" . urlencode($q) . "&c=$c&sort=$sort&order=$order";
 }
 ?>
 <!DOCTYPE html>
@@ -160,27 +103,31 @@ function build_url($p)
       ?></h3>
     </div>
 
-    <form method="GET" class="filter-card">
-      <input type="hidden" name="semester" value="<?php echo $selected_semester; ?>">
+    <form method="GET" action="score-page.php" class="filter-card">
+      <input type="hidden" name="semester" value="<?php echo htmlspecialchars($selected_semester); ?>">
       <div class="input-box">
         <label>Tìm tên môn học</label>
-        <input type="text" name="q" value="<?php echo htmlspecialchars($search_name); ?>" placeholder="Nhập từ khóa...">
+        <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>"
+          placeholder="Nhập từ khóa...">
       </div>
       <div class="filter-grid">
         <div class="input-box"><label>Số tín chỉ</label><input type="number" name="c"
-            value="<?php echo $search_credit; ?>"></div>
+            value="<?php echo htmlspecialchars($_GET['c'] ?? ''); ?>"></div>
         <div class="input-box"><label>Sắp xếp theo</label>
           <select name="sort">
-            <option value="score" <?php echo $sort_by == 'score' ? 'selected' : ''; ?>>Điểm số</option>
-            <option value="credits" <?php echo $sort_by == 'credits' ? 'selected' : ''; ?>>Số tín chỉ</option>
+            <option value="score" <?php echo ($_GET['sort'] ?? '') == 'score' ? 'selected' : ''; ?>>Điểm số</option>
+            <option value="credits" <?php echo ($_GET['sort'] ?? '') == 'credits' ? 'selected' : ''; ?>>Số tín chỉ
+            </option>
           </select>
         </div>
       </div>
       <div class="filter-grid">
         <div class="input-box"><label>Thứ tự</label>
           <select name="order">
-            <option value="DESC" <?php echo $sort_order == 'DESC' ? 'selected' : ''; ?>>Giảm dần</option>
-            <option value="ASC" <?php echo $sort_order == 'ASC' ? 'selected' : ''; ?>>Tăng dần</option>
+            <option value="DESC" <?php echo strtoupper($_GET['order'] ?? '') == 'DESC' ? 'selected' : ''; ?>>Giảm dần
+            </option>
+            <option value="ASC" <?php echo strtoupper($_GET['order'] ?? '') == 'ASC' ? 'selected' : ''; ?>>Tăng dần
+            </option>
           </select>
         </div>
         <div class="input-box" style="display:flex; align-items:flex-end;">
@@ -189,7 +136,7 @@ function build_url($p)
       </div>
     </form>
 
-    <form method="POST" class="flex-container" style="width:100%; margin-top:0;">
+    <form method="POST" action="./services/ScoreService.php" class="flex-container" style="width:100%; margin-top:0;">
       <div class="semester-card">
         <h3>Thông tin học kỳ</h3>
         <div class="input-box">
@@ -198,10 +145,12 @@ function build_url($p)
             <option value="Tất cả" <?php echo $is_all_mode ? 'selected' : ''; ?>>Tất cả (Xem tích lũy)</option>
             <?php foreach (["HK2 2025-2026", "HK3 2025-2026", "HK1 2026-2027", "HK2 2026-2027", "HK3 2026-2027"] as $opt): ?>
               <option value="<?php echo $opt; ?>" <?php echo ($opt == $selected_semester) ? 'selected' : ''; ?>>
-                <?php echo $opt; ?></option>
+                <?php echo $opt; ?>
+              </option>
             <?php endforeach; ?>
           </select>
         </div>
+        <input type="hidden" name="semester_name" value="<?php echo htmlspecialchars($selected_semester); ?>">
         <?php if (!$is_all_mode): ?>
           <div class="input-box"><label>Số môn học</label><input type="number" id="courseCount"
               value="<?php echo count($all_data); ?>"></div>
