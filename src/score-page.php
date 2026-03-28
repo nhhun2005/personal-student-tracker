@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $scoreService = new ScoreService();
 
-// Lấy dữ liệu để hiển thị (Logic GET bình thường)
+// Lấy dữ liệu để hiển thị (Logic GET bình thường cho lần đầu load trang)
 $data = $scoreService->getScorePageData($_SESSION['user_id'], $_GET);
 
 $selected_semester = $data['semester'];
@@ -39,6 +39,7 @@ $u_info = [
 $items_per_page = 5;
 $offset = ($current_page - 1) * $items_per_page;
 
+// Hàm build_url giữ lại để hỗ trợ nếu JS bị lỗi (fallback)
 function build_url($p)
 {
   global $selected_semester;
@@ -58,6 +59,7 @@ function build_url($p)
   <link rel="stylesheet" href="./css/global-style.css" />
   <link rel="stylesheet" href="./css/score-page.css" />
   <script>
+    // Các biến global cho JS sử dụng
     const SAVED_COURSES = <?php echo json_encode($all_data); ?>;
     const IS_ALL_MODE = <?php echo json_encode($is_all_mode); ?>;
   </script>
@@ -103,7 +105,8 @@ function build_url($p)
       ?></h3>
     </div>
 
-    <form method="GET" action="score-page.php" class="filter-card">
+    <!-- Thêm ID filterForm để JS bắt sự kiện submit -->
+    <form method="GET" action="score-page.php" id="filterForm" class="filter-card">
       <input type="hidden" name="semester" value="<?php echo htmlspecialchars($selected_semester); ?>">
       <div class="input-box">
         <label>Tìm tên môn học</label>
@@ -157,6 +160,7 @@ function build_url($p)
         <?php endif; ?>
       </div>
 
+      <!-- Container này sẽ được JS dùng để render lại danh sách môn học -->
       <div id="courseContainer" class="flex-container" style="width:100%; margin-top:0;">
         <?php foreach ($display_courses as $index => $course): ?>
           <div class="course-card">
@@ -174,9 +178,10 @@ function build_url($p)
         <?php endforeach; ?>
       </div>
 
+      <!-- Container phân trang -->
       <div class="pagination">
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-          <a href="<?php echo build_url($i); ?>"
+          <a href="<?php echo build_url($i); ?>" data-page="<?php echo $i; ?>"
             class="page-link <?php echo ($i == $current_page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
         <?php endfor; ?>
       </div>
