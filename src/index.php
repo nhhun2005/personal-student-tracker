@@ -87,12 +87,11 @@
         <form id="signup-form" method="POST" action="./services/UserService.php">
           <div class="input-box">
             <label for="fullname-input">Họ và tên:</label>
-            <input id="fullname-input" type="text" name="fullname" placeholder="Nguyen Van A..." />
+            <input id="fullname-input" type="text" name="fullname" placeholder="Tèo nguyễn" />
           </div>
           <div class="input-box">
             <label for="username-signup-input">Tên đăng nhập:</label>
-            <input id="username-signup-input" type="text" name="username_signup"
-              placeholder="Chọn tên đăng nhập (vd: teo_nguyen)" required />
+            <input id="username-signup-input" type="text" name="username_signup" placeholder="teo_nguyen_67" required />
           </div>
           <div class="input-box">
             <label for="studentid-input">MSSV:</label>
