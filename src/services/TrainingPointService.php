@@ -108,6 +108,12 @@ class TrainingPointService
             throw new RuntimeException('Thiếu tiêu chí khi lưu minh chứng.');
         }
 
+        // VALIDATION: Kiểm tra điểm vượt rào bằng Server-side
+        $maxScore = $this->tpRepo->getCriterionMaxScore($criterionId);
+        if ($score > $maxScore) {
+            throw new RuntimeException("Điểm bị từ chối: $score lớn hơn điểm tối đa ($maxScore) của mục này.");
+        }
+
         $semesterId = $this->ensureSemesterId($userId, $semesterName);
         $fileData = $this->readUploadedFile('evidence');
         $saved = $this->tpRepo->saveEvidence($userId, $semesterId, $criterionId, $score, $date, $fileData);
@@ -129,6 +135,12 @@ class TrainingPointService
 
         if ($evidenceId <= 0) {
             throw new RuntimeException('Thiếu ID minh chứng cần cập nhật.');
+        }
+
+        // VALIDATION: Kiểm tra điểm vượt rào bằng Server-side khi Cập nhật
+        $maxScore = $this->tpRepo->getMaxScoreByEvidenceId($evidenceId, $userId);
+        if ($score > $maxScore) {
+            throw new RuntimeException("Điểm bị từ chối: $score lớn hơn điểm tối đa ($maxScore) của mục này.");
         }
 
         $fileData = $this->readUploadedFile('update_evidence');
@@ -200,7 +212,7 @@ class TrainingPointService
     private function requireSemesterName($semesterName)
     {
         if ($semesterName === '') {
-            throw new RuntimeException('Thiếu thông tin học kỳ.');
+            throw new RuntimeException('Thiếu thông lưu học kỳ.');
         }
 
         return $semesterName;

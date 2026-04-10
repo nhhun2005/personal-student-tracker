@@ -31,11 +31,9 @@ class TrainingPointRepository
 
     /**
      * Lấy danh sách minh chứng dựa trên UserId và SemesterId
-     * Đảm bảo lấy đủ các cột để Service tính điểm và JS render giao diện
      */
     public function getEvidenceBySemesterId($userId, $semesterId)
     {
-        // Sử dụng LENGTH(content) để biết có file hay không mà không cần load toàn bộ BLOB vào RAM ở bước này
         $sql = "SELECT id, criterion_id, score_value, event_date, 
                        (CASE WHEN content IS NOT NULL AND LENGTH(content) > 0 THEN 1 ELSE 0 END) as has_content 
                 FROM evidences 
@@ -60,12 +58,9 @@ class TrainingPointRepository
                 VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->prepareOrFail($sql);
-
-        // Chuẩn bị dữ liệu: content là kiểu blob (b) nên truyền NULL trước
         $null = NULL;
         $stmt->bind_param("bdssii", $null, $score, $date, $critId, $userId, $semesterId);
 
-        // Nếu có dữ liệu file, gửi dữ liệu dài (long data) vào vị trí tham số 0 (cột content)
         if ($fileData !== null) {
             $stmt->send_long_data(0, $fileData);
         }
@@ -112,5 +107,37 @@ class TrainingPointRepository
         $stmt->close();
 
         return $affectedRows > 0;
+    }
+
+    /**
+     * HÀM MỚI: Lấy max_score từ bảng criterions để chặn Server-side khi TẠO MỚI
+     */
+    public function getCriterionMaxScore($critId)
+    {
+        $stmt = $this->prepareOrFail("SELECT max_score FROM criterions WHERE id = ? LIMIT 1");
+        $stmt->bind_param("i", $critId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return $result ? (float)$result['max_score'] : 0;
+    }
+
+    /**
+     * HÀM MỚI: Lấy max_score từ bảng criterions dựa vào ID minh chứng để chặn Server-side khi UPDATE
+     */
+    public function getMaxScoreByEvidenceId($evidenceId, $userId)
+    {
+        $sql = "SELECT c.max_score 
+                FROM evidences e 
+                JOIN criterions c ON e.criterion_id = c.id 
+                WHERE e.id = ? AND e.user_id = ? LIMIT 1";
+        $stmt = $this->prepareOrFail($sql);
+        $stmt->bind_param("ii", $evidenceId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return $result ? (float)$result['max_score'] : 0;
     }
 }

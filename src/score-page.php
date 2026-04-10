@@ -20,9 +20,10 @@ $final_score = $data['gpa'];
 $total_pages = $data['total_pages'];
 $current_page = $data['current_page'];
 
-// Map lại dữ liệu môn học
+// Map lại dữ liệu môn học, lấy thêm field id
 $display_courses = array_map(function ($c) {
   return [
+    'id' => $c['id'] ?? null,
     'name' => $c['course_name'] ?? '',
     'credits' => $c['credits'] ?? 0,
     'score' => $c['score'] ?? 0
@@ -106,7 +107,6 @@ function build_url($p)
       ?></h3>
     </div>
 
-    <!-- Thêm ID filterForm để JS bắt sự kiện submit -->
     <form method="GET" action="score-page.php" id="filterForm" class="filter-card">
       <input type="hidden" name="semester" value="<?php echo htmlspecialchars($selected_semester); ?>">
       <div class="input-box">
@@ -115,7 +115,7 @@ function build_url($p)
           placeholder="Nhập từ khóa...">
       </div>
       <div class="filter-grid">
-        <div class="input-box"><label>Số tín chỉ</label><input type="number" name="c"
+        <div class="input-box"><label>Số tín chỉ</label><input type="number" name="c" min="0"
             value="<?php echo htmlspecialchars($_GET['c'] ?? ''); ?>"></div>
         <div class="input-box"><label>Sắp xếp theo</label>
           <select name="sort">
@@ -156,30 +156,36 @@ function build_url($p)
         </div>
         <input type="hidden" name="semester_name" value="<?php echo htmlspecialchars($selected_semester); ?>">
         <?php if (!$is_all_mode): ?>
-          <div class="input-box"><label>Số môn học</label><input type="number" id="courseCount"
+          <div class="input-box"><label>Số môn học</label><input type="number" id="courseCount" min="0"
               value="<?php echo count($all_data); ?>"></div>
         <?php endif; ?>
       </div>
 
-      <!-- Container này sẽ được JS dùng để render lại danh sách môn học -->
       <div id="courseContainer" class="flex-container" style="width:100%; margin-top:0;">
         <?php foreach ($display_courses as $index => $course): ?>
           <div class="course-card">
-            <h4 style="color:#1d71bb; margin-bottom:1rem;">Môn <?php echo $offset + $index + 1; ?></h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="color:#1d71bb; margin: 0;">Môn <?php echo $offset + $index + 1; ?></h4>
+                <?php if (!$is_all_mode && !empty($course['id'])): ?>
+                    <button type="submit" name="delete_course" value="<?php echo $course['id']; ?>" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa môn này khỏi dữ liệu?');">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                <?php endif; ?>
+            </div>
+            
             <div class="input-box"><label>Tên môn</label><input type="text" name="c_name[]"
                 value="<?php echo htmlspecialchars($course['name']); ?>" <?php echo $is_all_mode ? 'readonly' : ''; ?>
                 required></div>
             <div class="course-card-details">
-              <div class="input-box"><label>Tín chỉ</label><input type="number" name="c_credit[]"
+              <div class="input-box"><label>Tín chỉ</label><input type="number" name="c_credit[]" min="0"
                   value="<?php echo $course['credits']; ?>" <?php echo $is_all_mode ? 'readonly' : ''; ?> required></div>
-              <div class="input-box"><label>Điểm</label><input type="number" step="0.1" max="4.0" name="c_score[]"
+              <div class="input-box"><label>Điểm</label><input type="number" step="0.1" min="0" max="4.0" name="c_score[]"
                   value="<?php echo $course['score']; ?>" <?php echo $is_all_mode ? 'readonly' : ''; ?> required></div>
             </div>
           </div>
         <?php endforeach; ?>
       </div>
 
-      <!-- Container phân trang -->
       <div class="pagination">
         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
           <a href="<?php echo build_url($i); ?>" data-page="<?php echo $i; ?>"

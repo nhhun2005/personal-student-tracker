@@ -191,24 +191,66 @@ function buildCreateEvidenceFormData(card, criterionId) {
 
     return formData;
 }
-function attachScoreValidation(input) {
+function attachScoreValidation(input, criterionId, currentEvidenceId = null) {
     if (input.dataset.hasValidation) return; // chặn duplicate
-
     input.dataset.hasValidation = "true";
 
     const block = input.closest(".criterion-block");
     const maxScore = Number(block?.dataset?.maxScore || 0);
-
     input.max = maxScore;
 
     input.addEventListener("input", () => {
         let value = parseFloat(input.value);
-
         if (isNaN(value)) return;
 
-        if (value > maxScore) {
-            alert(`Tối đa là ${maxScore}`);
-            input.value = maxScore;
+        // 1. Tính tổng điểm gốc từ DB (những minh chứng ĐÃ LƯU của tiêu chí này)
+        let originalSavedTotal = 0;
+        (tpointState.savedEvidences || []).forEach(ev => {
+            if (String(ev.criterion_id) === String(criterionId)) {
+                originalSavedTotal += parseFloat(ev.score_value) || 0;
+            }
+        });
+
+        // 2. Tính điểm đang gõ trên DOM (những thẻ ĐANG NHẬP MỚI hoặc ĐANG SỬA, trừ thẻ hiện tại)
+        let activeDomTotal = 0;
+        let originalBeingEditedTotal = 0;
+
+        block.querySelectorAll('.event-card').forEach(card => {
+            const isSavedEdit = card.classList.contains('saved') && card.classList.contains('is-editing');
+            const isNew = card.dataset.pending === "true";
+
+            if (isNew || isSavedEdit) {
+                const cardInput = card.querySelector('.new-score-input, .saved-score-input');
+                
+                // Bỏ qua ô input mình đang gõ
+                if (cardInput && cardInput !== input) {
+                    activeDomTotal += parseFloat(cardInput.value) || 0;
+                    
+                    // Nếu thẻ đó là thẻ đã lưu đang bật chế độ sửa, ta phải trừ điểm gốc của nó ra 
+                    // (vì điểm gốc đã được cộng vào originalSavedTotal ở bước 1 rồi)
+                    if (isSavedEdit) {
+                         originalBeingEditedTotal += parseFloat(cardInput.dataset.originalValue || 0);
+                    }
+                }
+            }
+        });
+
+        // Điểm gốc của thẻ hiện tại (nếu đây là thẻ đã lưu đang bật lên sửa)
+        let myOriginalVal = 0;
+        if (currentEvidenceId) {
+            myOriginalVal = parseFloat(input.dataset.originalValue || 0);
+        }
+
+        // Quỹ điểm đã dùng = Tổng gốc đã lưu - (Điểm gốc của các thẻ đang sửa + thẻ hiện tại) + Tổng điểm đang gõ mới
+        const usedScore = originalSavedTotal - originalBeingEditedTotal - myOriginalVal + activeDomTotal;
+        const availableScore = maxScore - usedScore;
+        
+        // Làm tròn 1 chữ số thập phân để tránh lỗi float của JS (VD: 6 - 5.9 = 0.10000000005)
+        const allowedMax = Math.max(0, Math.round(availableScore * 10) / 10);
+
+        if (value > allowedMax) {
+            alert(`Tổng điểm tiêu chí này không được vượt quá ${maxScore}!\nCác minh chứng khác đã chiếm ${Math.round(usedScore * 10) / 10} điểm. Bạn chỉ có thể nhập tối đa ${allowedMax} điểm nữa.`);
+            input.value = allowedMax;
         }
 
         if (value < 0) {
@@ -251,27 +293,30 @@ function addEvent(button, criterionId) {
     const cancelButton = card.querySelector(".cancel-edit-btn");
     const deleteBtn = card.querySelector(".delete-temp-btn");
 
-deleteBtn.addEventListener("click", () => {
-    card.remove();
-});
+    deleteBtn.addEventListener("click", () => {
+        card.remove();
+    });
 
     // SAVE
     saveButton.addEventListener("click", async () => {
         try {
             const scoreInput = card.querySelector(".new-score-input");
             const block = card.closest(".criterion-block");
-const maxScore = Number(block.dataset.maxScore || 0);
-
+            const maxScore = Number(block.dataset.maxScore || 0);
 
             const dateInput = card.querySelector(".new-date-input");
             const fileInput = card.querySelector(".new-file-input");
 
-            const score = scoreInput.value;
+            const score = parseFloat(scoreInput.value);
             const date = dateInput.value;
 
-            // validate
-            if (!score || !date) {
+            // Kiểm tra cứng giá trị bằng code thay vì chỉ chờ UI event
+            if (isNaN(score) || !date) {
                 alert("Vui lòng nhập đầy đủ điểm và ngày");
+                return;
+            }
+            if (score > maxScore) {
+                alert(`Điểm (${score}) không được vượt quá tối đa (${maxScore}) của tiêu chí này.`);
                 return;
             }
 
@@ -305,7 +350,7 @@ const maxScore = Number(block.dataset.maxScore || 0);
             showStatusMessage("Lưu thành công");
 
             // update UI từ backend
-           await fetchTpointData();
+            await fetchTpointData();
 
             // remove card pending
             card.remove();
@@ -326,7 +371,8 @@ const maxScore = Number(block.dataset.maxScore || 0);
 
     container.prepend(card);
     const scoreInput = card.querySelector(".new-score-input");
-attachScoreValidation(scoreInput);
+    // [CẬP NHẬT] Truyền thêm criterionId
+    attachScoreValidation(scoreInput, criterionId);
 }
 
 function setSavedEventEditMode(card, isEditing) {
@@ -406,8 +452,9 @@ function renderSavedEvent(container, data) {
   
     editButton?.addEventListener("click", () => {
         setSavedEventEditMode(card, true);
-           const scoreInput = card.querySelector(".saved-score-input");
-    attachScoreValidation(scoreInput);
+        const scoreInput = card.querySelector(".saved-score-input");
+        // [CẬP NHẬT] Truyền thêm criterion_id và evidence_id
+        attachScoreValidation(scoreInput, data.criterion_id, data.id);
     });
 
     cancelButton?.addEventListener("click", () => {
@@ -416,11 +463,20 @@ function renderSavedEvent(container, data) {
 
     saveButton?.addEventListener("click", async () => {
         const dateValue = card.querySelector(".saved-date-input")?.value || "";
-        const scoreValue = card.querySelector(".saved-score-input")?.value || "";
+        const scoreValue = parseFloat(card.querySelector(".saved-score-input")?.value);
         const fileInput = card.querySelector(".saved-file-input");
 
-        if (!dateValue || scoreValue === "") {
+        const block = card.closest(".criterion-block");
+        const maxScore = Number(block.dataset.maxScore || 0);
+
+        if (!dateValue || isNaN(scoreValue)) {
             showStatusMessage("Vui lòng nhập đủ ngày và điểm trước khi cập nhật.", true);
+            return;
+        }
+
+        // Chặn cứng logic ngay lúc submit Update
+        if (scoreValue > maxScore) {
+            showStatusMessage(`Điểm cập nhật (${scoreValue}) không được vượt quá tối đa (${maxScore}).`, true);
             return;
         }
 
@@ -446,26 +502,27 @@ function renderSavedEvent(container, data) {
             saveButton.textContent = "Cập nhật";
         }
     });
+    
     deleteButton?.addEventListener("click", async () => {
-    const confirmed = confirm("Xóa minh chứng này?");
-    if (!confirmed) return;
+        const confirmed = confirm("Xóa minh chứng này?");
+        if (!confirmed) return;
 
-    const formData = new FormData();
-    formData.append("delete_tpoint_evidence", "1");
-    formData.append("semester_name", tpointState.semesterName);
-    formData.append("evidence_id", String(data.id));
+        const formData = new FormData();
+        formData.append("delete_tpoint_evidence", "1");
+        formData.append("semester_name", tpointState.semesterName);
+        formData.append("evidence_id", String(data.id));
 
-    deleteButton.disabled = true;
-    deleteButton.textContent = "Đang xóa...";
+        deleteButton.disabled = true;
+        deleteButton.textContent = "Đang xóa...";
 
-    try {
-        await sendEvidenceRequest(formData);
-    } catch (error) {
-        showStatusMessage(error.message, true);
-        deleteButton.disabled = false;
-        deleteButton.textContent = "Xóa";
-    }
-});
+        try {
+            await sendEvidenceRequest(formData);
+        } catch (error) {
+            showStatusMessage(error.message, true);
+            deleteButton.disabled = false;
+            deleteButton.textContent = "Xóa";
+        }
+    });
 
     setSavedEventEditMode(card, false);
     container.appendChild(card);
@@ -494,7 +551,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateSummaryUI();
     renderAllEvidence();
 
-    await fetchTpointData(); // giờ chạy OK
+    await fetchTpointData();
 });
 
 document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
@@ -505,34 +562,72 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
         return;
     }
 
+    const saveBtn = document.getElementById("saveAllBtn");
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Đang lưu tất cả...";
+
+    let hasError = false;
+
     try {
         for (const card of pendingCards) {
             const criterionId = card.dataset.criterionId;
-            const date = card.querySelector(".new-date-input").value;
-            const score = card.querySelector(".new-score-input").value;
-            const fileInput = card.querySelector(".new-file-input");
+            
+            if (!criterionId || criterionId === "undefined" || criterionId === "null") {
+                console.warn("Bỏ qua 1 thẻ do không có criterionId hợp lệ:", card);
+                continue;
+            }
 
-            if (!score || !date) continue;
+            const date = card.querySelector(".new-date-input")?.value;
+            const scoreVal = parseFloat(card.querySelector(".new-score-input")?.value);
+            const fileInput = card.querySelector(".new-file-input");
+            
+            const block = card.closest(".criterion-block");
+            const maxScore = Number(block.dataset.maxScore || 0);
+
+            // Bỏ qua thẻ chưa nhập đủ thông tin hoặc vượt điểm tối đa
+            if (isNaN(scoreVal) || !date || scoreVal > maxScore) {
+                hasError = true;
+                continue; 
+            }
 
             const formData = new FormData();
             formData.append("create_tpoint_evidence", "1");
             formData.append("semester_name", tpointState.semesterName);
             formData.append("criterion_id", criterionId);
-            formData.append("event_score", score);
+            formData.append("event_score", scoreVal);
             formData.append("event_date", date);
 
-            if (fileInput.files[0]) {
+            if (fileInput && fileInput.files[0]) {
                 formData.append("evidence", fileInput.files[0]);
             }
 
-        await sendEvidenceRequest(formData);
+            const response = await fetch("./services/TrainingPointService.php", {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                body: formData
+            });
+
+            const payload = await response.json();
+            if (!response.ok || !payload.ok) {
+                console.error("Lỗi thẻ ID " + criterionId + ":", payload.message);
+                hasError = true;
+            }
         }
 
         await fetchTpointData();
-        showStatusMessage("Lưu tất cả thành công");
+        
+        if (hasError) {
+            showStatusMessage("Đã xử lý, nhưng có vài mục bị lỗi (Kiểm tra lại điểm vượt rào hoặc thiếu dữ liệu)", true);
+        } else {
+            showStatusMessage("Lưu tất cả thành công", false);
+        }
 
     } catch (err) {
         console.error(err);
-        alert("Lỗi khi lưu");
+        alert("Lỗi nghiêm trọng khi lưu dữ liệu");
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
     }
 });

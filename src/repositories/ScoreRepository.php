@@ -115,4 +115,15 @@ class ScoreRepository
         }
         return true;
     }
+    public function deleteCourse($courseId, $userId)
+    {
+        global $conn;
+        // Xóa thông qua JOIN để đảm bảo user chỉ có thể xóa môn của chính mình
+        $sql = "DELETE c FROM courses c
+                JOIN semesters s ON c.semester_id = s.id
+                WHERE c.id = ? AND s.user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $courseId, $userId);
+        return $stmt->execute();
+    }
 }

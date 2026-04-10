@@ -9,10 +9,13 @@ class ScoreService
     {
         $this->scoreRepo = new ScoreRepository();
     }
+    
     public function handleRequest($userId)
     {
         if (isset($_POST['save_score'])) {
             $this->handleScoreSave($userId);
+        } elseif (isset($_POST['delete_course'])) {
+            $this->handleDeleteCourse($userId); 
         }
     }
 
@@ -53,8 +56,22 @@ class ScoreService
         if (isset($_POST['save_score'])) {
             $semester = $_POST['semester_name'] ?? $_GET['semester'] ?? 'HK2 2025-2026';
             $names = $_POST['c_name'] ?? [];
-            $credits = $_POST['c_credit'] ?? [];
-            $scores = $_POST['c_score'] ?? [];
+            $raw_credits = $_POST['c_credit'] ?? [];
+            $raw_scores = $_POST['c_score'] ?? [];
+
+            // Backend Validation: Chặn triệt để dữ liệu sai lệch
+            $credits = [];
+            $scores = [];
+            
+            foreach ($raw_credits as $c) {
+                // Tín chỉ phải >= 0
+                $credits[] = max(0, intval($c)); 
+            }
+            
+            foreach ($raw_scores as $s) {
+                // Điểm phải >= 0 và <= 4.0
+                $scores[] = max(0, min(4.0, floatval($s))); 
+            }
 
             $this->scoreRepo->updateCourseScores($userId, $semester, $names, $credits, $scores);
             header("Location: ../score-page.php?semester=" . urlencode($semester) . "&success=1");
@@ -62,16 +79,25 @@ class ScoreService
         }
     }
 
+    public function handleDeleteCourse($userId)
+    {
+        if (isset($_POST['delete_course'])) {
+            $courseId = intval($_POST['delete_course']);
+            $semester = $_POST['semester_name'] ?? $_GET['semester'] ?? 'HK2 2025-2026';
+
+            $this->scoreRepo->deleteCourse($courseId, $userId);
+            header("Location: ../score-page.php?semester=" . urlencode($semester) . "&success=deleted");
+            exit();
+        }
+    }
 }
-
-
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     $scoreService = new ScoreService();
     $scoreService->handleRequest($_SESSION['user_id']);
 }
+?>

@@ -162,3 +162,22 @@ header h2, header p {
   font-weight: 600;
   font-size: 0.9rem;
 }
+
+/* Nút xóa */
+.delete-btn {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background-color: #ef4444;
+  color: white;
+}

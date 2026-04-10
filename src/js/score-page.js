@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Render lại danh sách môn học từ server
         const offset = (data.current_page - 1) * 5;
         const formattedData = data.courses.map(c => ({
+            id: c.id,
             name: c.course_name,
             credits: c.credits,
             score: c.score
@@ -52,13 +53,14 @@ document.addEventListener("DOMContentLoaded", () => {
         gpaClassification.innerText = "Xếp loại: " + rank;
     }
 
-    // 2. CHỨC NĂNG THỦ CÔNG: Thay đổi số lượng môn (Logic cũ của bạn)
+    // 2. CHỨC NĂNG THỦ CÔNG: Thay đổi số lượng môn
     if (typeof IS_ALL_MODE !== 'undefined' && IS_ALL_MODE) {
         // Nếu ở chế độ "Tất cả", không cho sửa số lượng
     } else if (courseCountInput) {
         courseCountInput.addEventListener("input", (e) => {
             let count = parseInt(e.target.value) || 0;
             if (count > 25) count = 25;
+            if (count < 0) count = 0; // Tránh số âm
             
             const currentData = harvestCurrentData();
             // Nếu tăng số lượng, lấy thêm từ dữ liệu mẫu (SAVED_COURSES) nếu có
@@ -69,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             renderCards(count, currentData);
             
-            // Khi sửa thủ công số lượng, tạm ẩn phân trang để tránh rối
             if (paginationContainer) paginationContainer.style.display = "none";
         });
     }
@@ -80,7 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const scores = document.getElementsByName("c_score[]");
         const data = [];
         for (let i = 0; i < names.length; i++) {
-            data.push({ 
+            data.push({
+                id: null,
                 name: names[i].value, 
                 credits: credits[i] ? credits[i].value : 0, 
                 score: scores[i] ? scores[i].value : 0 
@@ -94,21 +96,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const isReadOnly = (typeof IS_ALL_MODE !== 'undefined' && IS_ALL_MODE) ? 'readonly' : '';
         
         for (let i = 0; i < count; i++) {
-            const course = data[i] || { name: '', credits: '', score: '' };
+            const course = data[i] || { id: null, name: '', credits: '', score: '' };
             const card = document.createElement("div");
             card.className = "course-card";
+            
+            const deleteBtnHtml = (!isReadOnly && course.id) 
+                ? `<button type="submit" name="delete_course" value="${course.id}" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa môn này khỏi dữ liệu?');">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                   </button>` 
+                : '';
+
             card.innerHTML = `
-                <h4 style="color:#1d71bb; margin-bottom:1rem;">Môn ${offset + i + 1}</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="color:#1d71bb; margin: 0;">Môn ${offset + i + 1}</h4>
+                    ${deleteBtnHtml}
+                </div>
                 <div class="input-box">
                     <label>Tên môn</label>
                     <input type="text" name="c_name[]" value="${escapeHtml(course.name)}" ${isReadOnly} required>
                 </div>
                 <div class="course-card-details">
                     <div class="input-box"><label>Tín chỉ</label>
-                        <input type="number" name="c_credit[]" value="${course.credits}" ${isReadOnly} required>
+                        <input type="number" name="c_credit[]" min="0" value="${course.credits}" ${isReadOnly} required>
                     </div>
                     <div class="input-box"><label>Điểm</label>
-                        <input type="number" step="0.1" max="4.0" name="c_score[]" value="${course.score}" ${isReadOnly} required>
+                        <input type="number" step="0.1" min="0" max="4.0" name="c_score[]" value="${course.score}" ${isReadOnly} required>
                     </div>
                 </div>
             `;
@@ -144,13 +156,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Kiểm tra điểm tối đa
+    // Validate logic ngay khi gõ
     courseContainer.addEventListener('change', (e) => {
         if (e.target.name === "c_score[]") {
             const val = parseFloat(e.target.value);
             if (val > 4.0) { 
                 alert("Điểm tối đa là 4.0"); 
                 e.target.value = 4.0; 
+            } else if (val < 0) {
+                alert("Điểm tối thiểu là 0"); 
+                e.target.value = 0; 
+            }
+        } else if (e.target.name === "c_credit[]") {
+            const val = parseInt(e.target.value);
+            if (val < 0) {
+                alert("Số tín chỉ không được âm");
+                e.target.value = 0;
             }
         }
     });
