@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
 
 require_once './services/UserService.php';
 $userService = new UserService();
@@ -18,6 +19,7 @@ if (!$error_msg && $error_param == 'password_mismatch') {
 <html lang="vi">
 
 <head>
+    <meta charset="UTF-8" />
     <title>Đặt lại mật khẩu - Student Tracker</title>
     <link rel="stylesheet" href="./css/auth-style.css" />
 </head>

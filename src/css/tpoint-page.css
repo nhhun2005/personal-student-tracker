@@ -235,6 +235,80 @@ header p { color: #e0f2fe; margin: 0; font-size: 0.9rem; }
   border: 1px solid #93c5fd; 
   border-left: 4px solid #1d71bb; 
 }
+.event-card.saved.is-editing {
+  background: #dbeafe;
+  border-color: #60a5fa;
+}
+.saved-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.saved-file-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.saved-file-link {
+  text-decoration: none;
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  color: #0369a1;
+}
+.saved-file-empty {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.saved-upload-label {
+  display: none;
+}
+.event-card.saved.is-editing .saved-upload-label {
+  display: flex;
+}
+.saved-file-hint {
+  display: none;
+  color: #475569;
+}
+.saved-event-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.saved-event-actions button {
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.edit-event-btn,
+.save-event-btn,
+.cancel-edit-btn {
+  border: 1px solid #bfdbfe;
+  background: #ffffff;
+  color: #1d71bb;
+}
+.edit-event-btn:hover,
+.save-event-btn:hover,
+.cancel-edit-btn:hover {
+  background: #eff6ff;
+  border-color: #60a5fa;
+}
+.save-event-btn,
+.cancel-edit-btn {
+  display: none;
+}
+.delete-event-btn {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.delete-event-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
 .saved-label {
   color: #1d71bb;
   font-size: 11px;
@@ -255,6 +329,10 @@ header p { color: #e0f2fe; margin: 0; font-size: 0.9rem; }
   color: #1f2937;
 }
 .event-actions input:focus { border-color: #1d71bb; outline: none; box-shadow: 0 0 0 2px rgba(29, 113, 187, 0.1); }
+.event-card.saved .event-actions input:disabled {
+  background: #f8fafc;
+  color: #334155;
+}
 
 .upload-label {
   display: flex;
@@ -304,4 +382,21 @@ header p { color: #e0f2fe; margin: 0; font-size: 0.9rem; }
   background: #134a7a; 
   transform: translateY(-2px); 
   box-shadow: 0 4px 12px rgba(29, 113, 187, 0.3); 
+}
+.event-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-temp-btn {
+  cursor: pointer;
+  color: #ef4444;
+  font-weight: bold;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.delete-temp-btn:hover {
+  background: #fee2e2;
 }

@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
 session_start();
 // Nạp ScoreService
 require_once __DIR__ . '/services/ScoreService.php';

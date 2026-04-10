@@ -1,11 +1,18 @@
-// js/tpoint-page.js
-
 const sectionLimits = {
-    'I': 20,
-    'II': 25,
-    'III': 20,
-    'IV': 25,
-    'V': 10
+    I: 20,
+    II: 25,
+    III: 20,
+    IV: 25,
+    V: 10
+};
+
+let tpointState = {
+    currentScore: 0,
+    maxScore: 100,
+    semesterName: "",
+    sectionScores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+    classification: "N/A",
+    savedEvidences: []
 };
 
 function toggleAccordion(element) {
@@ -13,198 +20,519 @@ function toggleAccordion(element) {
     card.classList.toggle("active");
 }
 
-function changeSemester(s) {
-    window.location.href = "?semester=" + encodeURIComponent(s);
+function changeSemester(semesterName) {
+    window.location.href = "?semester=" + encodeURIComponent(semesterName);
 }
 
 function getTodayDate() {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
 }
 
 function displayFileName(input) {
     const name = input.files[0] ? input.files[0].name : "";
-    const display = input.closest('.event-card').querySelector('.file-name-display');
-    if (display) display.textContent = "File: " + name;
+    const display = input.closest(".event-card").querySelector(".file-name-display");
+    if (display) {
+        display.textContent = name ? `File: ${name}` : "";
+    }
 }
 
 function updateProgress(score, maxScore) {
-    const percent = Math.min((score / maxScore) * 100, 100);
+    const percent = maxScore > 0 ? Math.min((score / maxScore) * 100, 100) : 0;
     const fill = document.getElementById("progressFill");
-    if (fill) fill.style.width = percent + "%";
+    if (fill) {
+        fill.style.width = percent + "%";
+    }
 }
 
-function checkScoreLimit(input) {
-    const block = input.closest('.criterion-block');
-    const badge = block.querySelector('.badge');
-    const maxCritAllowed = parseFloat(badge.textContent);
-    
-    // 1. Kiểm tra tiêu chí nhỏ (Ia, Ib..)
-    let critTotal = 0;
-    block.querySelectorAll('.event-score').forEach(inp => {
-        critTotal += parseFloat(inp.value) || 0;
-    });
+function showStatusMessage(message, isError = false) {
+    const box = document.getElementById("statusMessage");
+    if (!box) return;
 
-    if (critTotal > maxCritAllowed) {
-        alert(`Tiêu chí này tối đa chỉ được ${maxCritAllowed} điểm!`);
-        input.value = "";
+    if (!message) {
+        box.style.display = "none";
+        box.textContent = "";
+        return;
     }
 
-    // 2. Kiểm tra mục lớn (I, II..)
-    const sectionCard = input.closest('.accordion-card');
-    const sectionKey = sectionCard.getAttribute('data-section');
-    const maxSectionAllowed = sectionLimits[sectionKey];
-
-    let sectionTotal = 0;
-    sectionCard.querySelectorAll('.event-score').forEach(inp => {
-        sectionTotal += parseFloat(inp.value) || 0;
-    });
-
-    if (sectionTotal > maxSectionAllowed) {
-        alert(`Mục ${sectionKey} đã vượt quá giới hạn ${maxSectionAllowed} điểm!`);
-        input.value = "";
-    }
-
-    checkAllAddButtons();
+    box.textContent = message;
+    box.style.display = "block";
+    box.style.background = isError ? "#fef2f2" : "#e0f2fe";
+    box.style.color = isError ? "#b91c1c" : "#0369a1";
+    box.style.borderColor = isError ? "#fecaca" : "#bae6fd";
 }
 
-function checkAllAddButtons() {
-    // Lặp qua từng thẻ mục lớn
-    document.querySelectorAll('.accordion-card').forEach(sectionCard => {
-        const sectionKey = sectionCard.getAttribute('data-section');
-        const maxSectionAllowed = sectionLimits[sectionKey];
-        
-        let sectionTotal = 0;
-        sectionCard.querySelectorAll('.event-score').forEach(inp => {
-            sectionTotal += parseFloat(inp.value) || 0;
-        });
+function updateSummaryUI() {
+    const totalScore = document.getElementById("totalScore");
+    if (totalScore) {
+        totalScore.textContent = `${tpointState.currentScore} / ${tpointState.maxScore}`;
+    }
 
-        // Nếu cả mục lớn đầy điểm, khóa TẤT CẢ nút thêm trong mục đó
-        const isSectionFull = sectionTotal >= maxSectionAllowed;
+    const classificationText = document.getElementById("classificationText");
+    if (classificationText) {
+        classificationText.textContent = tpointState.classification;
+    }
 
-        sectionCard.querySelectorAll('.criterion-block').forEach(block => {
-            const maxCritAllowed = parseFloat(block.querySelector('.badge').textContent);
-            let critTotal = 0;
-            block.querySelectorAll('.event-score').forEach(inp => {
-                critTotal += parseFloat(inp.value) || 0;
-            });
+    const sectionMap = { I: 1, II: 2, III: 3, IV: 4, V: 5 };
+    document.querySelectorAll(".accordion-card").forEach((sectionCard) => {
+        const sectionKey = sectionCard.getAttribute("data-section");
+        const scoreIndex = sectionMap[sectionKey];
+        const currentValue = tpointState.sectionScores?.[scoreIndex] ?? 0;
+        const maxValue = sectionLimits[sectionKey] ?? 0;
+        const display = sectionCard.querySelector(".section-score-display");
+        if (display) {
+            display.textContent = `${currentValue}/${maxValue}`;
+        }
+    });
 
-            const addButton = block.querySelector('.add-event-btn');
-            if (!addButton) return;
+    updateProgress(tpointState.currentScore, tpointState.maxScore);
+}
 
-            if (isSectionFull) {
-                addButton.style.pointerEvents = "none";
-                addButton.style.opacity = "0.5";
-                addButton.innerText = `Mục ${sectionKey} đã đủ điểm`;
-            } else if (critTotal >= maxCritAllowed) {
-                addButton.style.pointerEvents = "none";
-                addButton.style.opacity = "0.5";
-                addButton.innerText = "Tiêu chí này đã đủ điểm";
-            } else {
-                addButton.style.pointerEvents = "auto";
-                addButton.style.opacity = "1";
-                addButton.innerText = "+ Thêm sự kiện";
-            }
-        });
+
+function clearRenderedEvidence() {
+    document.querySelectorAll(".event-container").forEach((container) => {
+        container.innerHTML = "";
+    });
+}
+
+function renderAllEvidence() {
+    clearRenderedEvidence();
+
+    (tpointState.savedEvidences || []).forEach((evidence) => {
+        const critId = String(evidence.criterion_id);
+
+        const block = document.querySelector(
+            `.criterion-block[data-criterion-id="${critId}"]`
+        );
+
+        if (!block) {
+            console.warn("Không tìm thấy block cho criterion:", critId);
+            return;
+        }
+
+        const container = block.querySelector(".event-container");
+        if (!container) return;
+
+        renderSavedEvent(container, evidence);
+    });
+}
+
+function applyBackendData(data, message = "") {
+    tpointState = {
+        currentScore: Number(data.final_score || 0),
+        maxScore: tpointState.maxScore || 100,
+        semesterName: data.semester || tpointState.semesterName,
+        sectionScores: data.scores || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+        classification: data.classification || "N/A",
+        savedEvidences: data.evidence_data || []
+    };
+
+    const app = document.getElementById("tpointApp");
+    if (app) {
+        app.dataset.semesterName = tpointState.semesterName;
+    }
+
+    updateSummaryUI();
+    renderAllEvidence();
+    showStatusMessage(message, false);
+}
+
+async function fetchTpointData() {
+    const params = new URLSearchParams({
+        action: "fetch_tpoint_data",
+        semester: tpointState.semesterName
+    });
+
+    const response = await fetch(`./services/TrainingPointService.php?${params.toString()}`, {
+        headers: { Accept: "application/json" }
+    });
+
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || "Không thể tải dữ liệu điểm rèn luyện.");
+    }
+
+    applyBackendData(payload.data, payload.message || "");
+}
+
+async function sendEvidenceRequest(formData) {
+    const response = await fetch("./services/TrainingPointService.php", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData
+    });
+
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || "Không thể lưu minh chứng.");
+    }
+
+    await fetchTpointData();
+    showStatusMessage(payload.message || "Thao tác thành công.", false);
+}
+
+function buildCreateEvidenceFormData(card, criterionId) {
+    const dateValue = card.querySelector(".new-date-input")?.value || "";
+    const scoreValue = card.querySelector(".new-score-input")?.value || "";
+    const fileInput = card.querySelector(".new-file-input");
+
+    if (!dateValue || scoreValue === "") {
+        throw new Error("Vui lòng nhập đủ ngày và điểm trước khi lưu.");
+    }
+
+    const formData = new FormData();
+    formData.append("create_tpoint_evidence", "1");
+    formData.append("semester_name", tpointState.semesterName);
+    formData.append("criterion_id", String(criterionId));
+    formData.append("event_date", dateValue);
+    formData.append("event_score", scoreValue);
+    if (fileInput?.files?.[0]) {
+        formData.append("evidence", fileInput.files[0]);
+    }
+
+    return formData;
+}
+function attachScoreValidation(input) {
+    if (input.dataset.hasValidation) return; // chặn duplicate
+
+    input.dataset.hasValidation = "true";
+
+    const block = input.closest(".criterion-block");
+    const maxScore = Number(block?.dataset?.maxScore || 0);
+
+    input.max = maxScore;
+
+    input.addEventListener("input", () => {
+        let value = parseFloat(input.value);
+
+        if (isNaN(value)) return;
+
+        if (value > maxScore) {
+            alert(`Tối đa là ${maxScore}`);
+            input.value = maxScore;
+        }
+
+        if (value < 0) {
+            input.value = 0;
+        }
     });
 }
 
 function addEvent(button, criterionId) {
     const container = button.previousElementSibling;
-    const eventCount = container.querySelectorAll('.event-card').length + 1;
+    const eventCount = container.querySelectorAll(".event-card").length + 1;
     const today = getTodayDate();
 
-    const eventCard = document.createElement("div");
-    eventCard.classList.add("event-card");
+    const card = document.createElement("div");
+    card.classList.add("event-card");
+    card.dataset.pending = "true";
+    card.dataset.criterionId = String(criterionId);
 
-    eventCard.innerHTML = `
-      <div class="event-title">Sự kiện mới ${eventCount}</div>
+    card.innerHTML = `
+      <div class="event-title">
+  Sự kiện mới ${eventCount}
+  <span class="delete-temp-btn">✖</span>
+</div>
       <div class="event-actions">
-        <input type="hidden" name="crit_id[]" value="${criterionId}">
-        <input type="date" name="event_dates[]" value="${today}" max="${today}" required>
-        <input type="number" name="event_scores[]" class="event-score" 
-               placeholder="Điểm" min="0" step="0.1" required 
-               oninput="checkScoreLimit(this)">
+        <input type="date" class="new-date-input" value="${today}" max="${today}" required>
+        <input type="number" class="new-score-input" placeholder="Điểm" min="0" step="0.1" required>
         <label class="upload-label">
           📤 Minh chứng
-          <input type="file" name="evidences[]" accept="image/*,.pdf" onchange="displayFileName(this)">
+          <input type="file" class="new-file-input" accept="image/*,.pdf">
         </label>
       </div>
       <small class="file-name-display" style="display:block; margin-top:5px; color:#666;"></small>
+      <div class="saved-event-actions">
+        <button type="button" class="save-event-btn">Lưu minh chứng</button>
+        <button type="button" class="cancel-edit-btn">Hủy</button>
+      </div>
     `;
 
-    container.appendChild(eventCard);
+    const saveButton = card.querySelector(".save-event-btn");
+    const cancelButton = card.querySelector(".cancel-edit-btn");
+    const deleteBtn = card.querySelector(".delete-temp-btn");
+
+deleteBtn.addEventListener("click", () => {
+    card.remove();
+});
+
+    // SAVE
+    saveButton.addEventListener("click", async () => {
+        try {
+            const scoreInput = card.querySelector(".new-score-input");
+            const block = card.closest(".criterion-block");
+const maxScore = Number(block.dataset.maxScore || 0);
+
+
+            const dateInput = card.querySelector(".new-date-input");
+            const fileInput = card.querySelector(".new-file-input");
+
+            const score = scoreInput.value;
+            const date = dateInput.value;
+
+            // validate
+            if (!score || !date) {
+                alert("Vui lòng nhập đầy đủ điểm và ngày");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("create_tpoint_evidence", "1");
+            formData.append("semester_name", tpointState.semesterName);
+            formData.append("criterion_id", criterionId);
+            formData.append("event_score", score);
+            formData.append("event_date", date);
+
+            if (fileInput.files[0]) {
+                formData.append("evidence", fileInput.files[0]);
+            }
+
+            // 🔄 UI loading
+            saveButton.disabled = true;
+            saveButton.textContent = "Đang lưu...";
+
+            const res = await fetch("./services/TrainingPointService.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+
+            if (!result.ok) {
+                throw new Error(result.message);
+            }
+
+            // SUCCESS
+            showStatusMessage("Lưu thành công");
+
+            // update UI từ backend
+           await fetchTpointData();
+
+            // remove card pending
+            card.remove();
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+
+            saveButton.disabled = false;
+            saveButton.textContent = "Lưu minh chứng";
+        }
+    });
+
+    // CANCEL
+    cancelButton.addEventListener("click", () => {
+        card.remove();
+    });
+
+    container.prepend(card);
+    const scoreInput = card.querySelector(".new-score-input");
+attachScoreValidation(scoreInput);
+}
+
+function setSavedEventEditMode(card, isEditing) {
+    card.classList.toggle("is-editing", isEditing);
+
+    const dateInput = card.querySelector(".saved-date-input");
+    const scoreInput = card.querySelector(".saved-score-input");
+    const fileInput = card.querySelector(".saved-file-input");
+    const fileHint = card.querySelector(".saved-file-hint");
+    const editButton = card.querySelector(".edit-event-btn");
+    const saveButton = card.querySelector(".save-event-btn");
+    const cancelButton = card.querySelector(".cancel-edit-btn");
+    const deleteButton = card.querySelector(".delete-event-btn");
+
+    if (dateInput) dateInput.disabled = !isEditing;
+    if (scoreInput) scoreInput.disabled = !isEditing;
+    if (fileInput) fileInput.disabled = !isEditing;
+    if (fileHint) fileHint.style.display = isEditing ? "block" : "none";
+    if (editButton) editButton.style.display = isEditing ? "none" : "inline-flex";
+    if (saveButton) saveButton.style.display = isEditing ? "inline-flex" : "none";
+    if (cancelButton) cancelButton.style.display = isEditing ? "inline-flex" : "none";
+    if (deleteButton) deleteButton.style.display = isEditing ? "none" : "inline-flex";
+}
+
+function resetSavedEventForm(card) {
+    const dateInput = card.querySelector(".saved-date-input");
+    const scoreInput = card.querySelector(".saved-score-input");
+    const fileInput = card.querySelector(".saved-file-input");
+    const display = card.querySelector(".file-name-display");
+    const defaultFileMessage = display?.dataset.defaultText || "";
+
+    if (dateInput) dateInput.value = dateInput.dataset.originalValue || "";
+    if (scoreInput) scoreInput.value = scoreInput.dataset.originalValue || "";
+    if (fileInput) fileInput.value = "";
+    if (display) display.textContent = defaultFileMessage;
+
+    setSavedEventEditMode(card, false);
 }
 
 function renderSavedEvent(container, data) {
     const card = document.createElement("div");
     card.classList.add("event-card", "saved");
 
-    const hasEvidence = data.has_content == 1;
+    const hasEvidence = Number(data.has_content) === 1;
+    const fileStatusMarkup = hasEvidence
+        ? `<a href="./includes/view-evidence.php?id=${data.id}" target="_blank" class="upload-label saved-file-link">Xem minh chứng hiện tại</a>`
+        : `<span class="upload-label saved-file-link saved-file-empty">Chưa có minh chứng</span>`;
+    const fileStatusText = hasEvidence
+        ? "Đang giữ file minh chứng hiện tại. Chọn file mới nếu muốn thay thế."
+        : "Chưa có file minh chứng. Có thể chọn file để bổ sung.";
 
     card.innerHTML = `
       <div class="event-actions">
-        <input type="date" value="${data.event_date}" disabled>
-        <input type="number" value="${data.score_value}" disabled class="event-score">
-        
-        ${hasEvidence ?
-            `<a href="./includes/view-evidence.php?id=${data.id}" target="_blank" class="upload-label" 
-              style="background:#e0f2fe; border:1px solid #7dd3fc; text-decoration:none; color:#0369a1;">
-              Xem minh chứng
-           </a>` :
-            `<span class="upload-label" style="background:#f3f4f6; color:#9ca3af; cursor:not-allowed;">
-              Không có minh chứng
-           </span>`
-        }
+        <input type="date" value="${data.event_date}" data-original-value="${data.event_date}" max="${getTodayDate()}" disabled class="saved-date-input" required>
+        <input type="number" value="${data.score_value}" data-original-value="${data.score_value}" class="saved-score-input" min="0" step="0.1" disabled required>
+        <div class="saved-file-stack">
+          ${fileStatusMarkup}
+          <label class="upload-label saved-upload-label">
+            Chọn file mới
+            <input type="file" class="saved-file-input" accept="image/*,.pdf" onchange="displayFileName(this)" disabled>
+          </label>
+        </div>
+      </div>
+      <small class="file-name-display saved-file-hint" data-default-text="${encodeHtml(fileStatusText)}">${fileStatusText}</small>
+      <div class="saved-event-actions">
+        <button type="button" class="edit-event-btn">Sửa</button>
+        <button type="button" class="save-event-btn">Cập nhật</button>
+        <button type="button" class="cancel-edit-btn">Hủy sửa</button>
+        <button type="button" class="delete-event-btn">Xóa</button>
       </div>
     `;
+
+    const editButton = card.querySelector(".edit-event-btn");
+    const saveButton = card.querySelector(".save-event-btn");
+    const cancelButton = card.querySelector(".cancel-edit-btn");
+    const deleteButton = card.querySelector(".delete-event-btn");
+  
+    editButton?.addEventListener("click", () => {
+        setSavedEventEditMode(card, true);
+           const scoreInput = card.querySelector(".saved-score-input");
+    attachScoreValidation(scoreInput);
+    });
+
+    cancelButton?.addEventListener("click", () => {
+        resetSavedEventForm(card);
+    });
+
+    saveButton?.addEventListener("click", async () => {
+        const dateValue = card.querySelector(".saved-date-input")?.value || "";
+        const scoreValue = card.querySelector(".saved-score-input")?.value || "";
+        const fileInput = card.querySelector(".saved-file-input");
+
+        if (!dateValue || scoreValue === "") {
+            showStatusMessage("Vui lòng nhập đủ ngày và điểm trước khi cập nhật.", true);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("update_tpoint_evidence", "1");
+        formData.append("semester_name", tpointState.semesterName);
+        formData.append("evidence_id", String(data.id));
+        formData.append("update_event_date", dateValue);
+        formData.append("update_event_score", scoreValue);
+        if (fileInput?.files?.[0]) {
+            formData.append("update_evidence", fileInput.files[0]);
+        }
+
+        saveButton.disabled = true;
+        saveButton.textContent = "Đang cập nhật...";
+
+        try {
+            await sendEvidenceRequest(formData);
+            setSavedEventEditMode(card, false);
+        } catch (error) {
+            showStatusMessage(error.message, true);
+            saveButton.disabled = false;
+            saveButton.textContent = "Cập nhật";
+        }
+    });
+    deleteButton?.addEventListener("click", async () => {
+    const confirmed = confirm("Xóa minh chứng này?");
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append("delete_tpoint_evidence", "1");
+    formData.append("semester_name", tpointState.semesterName);
+    formData.append("evidence_id", String(data.id));
+
+    deleteButton.disabled = true;
+    deleteButton.textContent = "Đang xóa...";
+
+    try {
+        await sendEvidenceRequest(formData);
+    } catch (error) {
+        showStatusMessage(error.message, true);
+        deleteButton.disabled = false;
+        deleteButton.textContent = "Xóa";
+    }
+});
+
+    setSavedEventEditMode(card, false);
     container.appendChild(card);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const config = window.TPOINT_DATA || { currentScore: 0, maxScore: 100, savedEvidences: [] };
-    
-    updateProgress(config.currentScore, config.maxScore);
+function encodeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
 
-    if (config.savedEvidences && config.savedEvidences.length > 0) {
-        config.savedEvidences.forEach(ev => {
-            const block = document.querySelector(`.criterion-block[data-criterion-id="${ev.criterion_id}"]`);
-            if (block) {
-                const container = block.querySelector('.event-container');
-                renderSavedEvent(container, ev);
-            }
-        });
+document.addEventListener("DOMContentLoaded", async () => {
+    const config = window.TPOINT_DATA || {};
+    tpointState = {
+        currentScore: Number(config.currentScore || 0),
+        maxScore: Number(config.maxScore || 100),
+        semesterName: config.semesterName || "",
+        sectionScores: config.sectionScores || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+        classification: config.classification || "N/A",
+        savedEvidences: config.savedEvidences || []
+    };
+
+    updateSummaryUI();
+    renderAllEvidence();
+
+    await fetchTpointData(); // giờ chạy OK
+});
+
+document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
+    const pendingCards = document.querySelectorAll('.event-card[data-pending="true"]');
+
+    if (pendingCards.length === 0) {
+        alert("Không có dữ liệu cần lưu");
+        return;
     }
 
-    checkAllAddButtons();
+    try {
+        for (const card of pendingCards) {
+            const criterionId = card.dataset.criterionId;
+            const date = card.querySelector(".new-date-input").value;
+            const score = card.querySelector(".new-score-input").value;
+            const fileInput = card.querySelector(".new-file-input");
 
-    const form = document.getElementById('tpointForm');
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            // JS validate trước khi gửi
-            let hasError = false;
-            document.querySelectorAll('.accordion-card').forEach(sectionCard => {
-                const sectionKey = sectionCard.getAttribute('data-section');
-                const maxSectionAllowed = sectionLimits[sectionKey];
-                let sectionTotal = 0;
-                sectionCard.querySelectorAll('.event-score').forEach(inp => {
-                    sectionTotal += parseFloat(inp.value) || 0;
-                });
-                if (sectionTotal > maxSectionAllowed) {
-                    alert(`Mục ${sectionKey} quá giới hạn (${maxSectionAllowed})! Vui lòng kiểm tra lại.`);
-                    hasError = true;
-                }
-            });
+            if (!score || !date) continue;
 
-            if (hasError) {
-                e.preventDefault();
-            } else {
-                const btn = document.querySelector('.submit-btn');
-                if (btn) {
-                    btn.innerHTML = "Đang xử lý...";
-                    btn.style.opacity = "0.7";
-                    btn.style.pointerEvents = "none";
-                }
+            const formData = new FormData();
+            formData.append("create_tpoint_evidence", "1");
+            formData.append("semester_name", tpointState.semesterName);
+            formData.append("criterion_id", criterionId);
+            formData.append("event_score", score);
+            formData.append("event_date", date);
+
+            if (fileInput.files[0]) {
+                formData.append("evidence", fileInput.files[0]);
             }
-        });
+
+        await sendEvidenceRequest(formData);
+        }
+
+        await fetchTpointData();
+        showStatusMessage("Lưu tất cả thành công");
+
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi khi lưu");
     }
 });

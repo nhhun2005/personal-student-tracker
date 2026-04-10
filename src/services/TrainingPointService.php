@@ -10,44 +10,6 @@ class TrainingPointService
         $this->tpRepo = new TrainingPointRepository();
     }
 
-    public function handleRequest($userId)
-    {
-        if (isset($_POST['save_tpoint'])) {
-            $semesterName = $_POST['semester_name'];
-
-            // 1. Lấy hoặc tạo Semester ID
-            $semesterId = $this->tpRepo->getSemesterId($userId, $semesterName);
-            if (!$semesterId) {
-                global $conn;
-                $stmt = $conn->prepare("INSERT INTO semesters (semester_name, user_id) VALUES (?, ?)");
-                $stmt->bind_param("si", $semesterName, $userId);
-                $stmt->execute();
-                $semesterId = $conn->insert_id;
-            }
-
-            // 2. Xử lý danh sách minh chứng từ Form (ĐÃ SỬA TÊN BIẾN THEO JS)
-            if (isset($_POST['crit_id'])) {
-                foreach ($_POST['crit_id'] as $i => $critId) {
-                    // Lấy đúng tên mảng từ JavaScript: event_scores và event_dates
-                    $score = isset($_POST['event_scores'][$i]) ? floatval($_POST['event_scores'][$i]) : 0;
-                    $date = isset($_POST['event_dates'][$i]) ? $_POST['event_dates'][$i] : date('Y-m-d');
-
-                    // Xử lý file nếu có (Tên input file trong JS là evidences[])
-                    $fileData = null;
-                    if (isset($_FILES['evidences']['tmp_name'][$i]) && is_uploaded_file($_FILES['evidences']['tmp_name'][$i])) {
-                        $fileData = file_get_contents($_FILES['evidences']['tmp_name'][$i]);
-                    }
-
-                    // Lưu vào Repo
-                    $this->tpRepo->saveEvidence($userId, $semesterId, $critId, $score, $date, $fileData);
-                }
-            }
-
-            header("Location: ../tpoint-page.php?semester=" . urlencode($semesterName) . "&msg=saved");
-            exit();
-        }
-    }
-
     public function getPageData($userId, $semesterName)
     {
         $semesterId = $this->tpRepo->getSemesterId($userId, $semesterName);
@@ -55,10 +17,8 @@ class TrainingPointService
             return $this->getEmptyData($semesterName);
         }
 
-        $evidence_data = $this->tpRepo->getEvidenceBySemesterId($userId, $semesterId);
-
-        // Mảng lưu trữ điểm thô của 5 mục lớn
-        $section_scores = [
+        $evidenceData = $this->tpRepo->getEvidenceBySemesterId($userId, $semesterId);
+        $sectionScores = [
             'I' => 0,
             'II' => 0,
             'III' => 0,
@@ -66,53 +26,227 @@ class TrainingPointService
             'V' => 0
         ];
 
-        foreach ($evidence_data as $row) {
+        foreach ($evidenceData as $row) {
             $critId = (int) $row['criterion_id'];
-            $val = (float) $row['score_value'];
+            $scoreValue = (float) $row['score_value'];
 
-            // Phân loại crit_id vào các mục lớn (Dựa trên CSDL của bạn)
-            if ($critId >= 1 && $critId <= 4)
-                $section_scores['I'] += $val;
-            elseif ($critId >= 5 && $critId <= 8)
-                $section_scores['II'] += $val;
-            elseif ($critId >= 9 && $critId <= 11)
-                $section_scores['III'] += $val;
-            elseif ($critId >= 12 && $critId <= 14)
-                $section_scores['IV'] += $val;
-            elseif ($critId >= 15 && $critId <= 17)
-                $section_scores['V'] += $val;
+            if ($critId >= 1 && $critId <= 5) {
+                $sectionScores['I'] += $scoreValue;
+            } elseif ($critId >= 6 && $critId <= 7) {
+                $sectionScores['II'] += $scoreValue;
+            } elseif ($critId >= 8 && $critId <= 10) {
+                $sectionScores['III'] += $scoreValue;
+            } elseif ($critId >= 11 && $critId <= 13) {
+                $sectionScores['IV'] += $scoreValue;
+            } elseif ($critId >= 14 && $critId <= 17) {
+                $sectionScores['V'] += $scoreValue;
+            }
         }
 
-        // Áp dụng giới hạn theo yêu cầu của bạn
-        $final_scores = [
-            1 => min($section_scores['I'], 20),
-            2 => min($section_scores['II'], 25),
-            3 => min($section_scores['III'], 20),
-            4 => min($section_scores['IV'], 25),
-            5 => min($section_scores['V'], 10)
+        $finalScores = [
+            1 => min($sectionScores['I'], 20),
+            2 => min($sectionScores['II'], 25),
+            3 => min($sectionScores['III'], 20),
+            4 => min($sectionScores['IV'], 25),
+            5 => min($sectionScores['V'], 10)
         ];
 
-        $total_sum = array_sum($final_scores);
+        $totalSum = array_sum($finalScores);
 
         return [
             'semester' => $semesterName,
-            'evidence_data' => $evidence_data,
-            'scores' => $final_scores,
-            'final_score' => $total_sum,
-            'classification' => $this->calculateClassification($total_sum)
+            'evidence_data' => $evidenceData,
+            'scores' => $finalScores,
+            'final_score' => $totalSum,
+            'classification' => $this->calculateClassification($totalSum)
         ];
+    }
+
+    public function handleApiRequest($userId)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $action = $_GET['action'] ?? '';
+            if ($action !== 'fetch_tpoint_data') {
+                throw new RuntimeException('Action GET không hợp lệ.');
+            }
+
+            $semesterName = $_GET['semester'] ?? '';
+            if ($semesterName === '') {
+                throw new RuntimeException('Thiếu học kỳ để tải dữ liệu.');
+            }
+
+            return $this->buildPayload($userId, $semesterName, '');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            throw new RuntimeException('Method không được hỗ trợ.');
+        }
+
+        if (isset($_POST['create_tpoint_evidence'])) {
+            return $this->handleCreateEvidence($userId);
+        }
+
+        if (isset($_POST['update_tpoint_evidence'])) {
+            return $this->handleUpdateEvidence($userId);
+        }
+
+        if (isset($_POST['delete_tpoint_evidence'])) {
+            return $this->handleDeleteEvidence($userId);
+        }
+
+        throw new RuntimeException('Request không hợp lệ hoặc thiếu action submit.');
+    }
+
+    private function handleCreateEvidence($userId)
+    {
+        $semesterName = $this->requireSemesterName($_POST['semester_name'] ?? '');
+        $criterionId = isset($_POST['criterion_id']) ? (int) $_POST['criterion_id'] : 0;
+        $score = $this->requireScore($_POST['event_score'] ?? null, 'Thiếu điểm khi lưu minh chứng.');
+        $date = $this->requireValidDate($_POST['event_date'] ?? '');
+
+        if ($criterionId <= 0) {
+            throw new RuntimeException('Thiếu tiêu chí khi lưu minh chứng.');
+        }
+
+        $semesterId = $this->ensureSemesterId($userId, $semesterName);
+        $fileData = $this->readUploadedFile('evidence');
+        $saved = $this->tpRepo->saveEvidence($userId, $semesterId, $criterionId, $score, $date, $fileData);
+
+        if (!$saved) {
+            error_log("TrainingPoint create failed for user_id={$userId}, semester={$semesterName}, criterion_id={$criterionId}");
+            throw new RuntimeException('Không thể lưu minh chứng mới.');
+        }
+
+        return $this->buildPayload($userId, $semesterName, 'Lưu minh chứng thành công!');
+    }
+
+    private function handleUpdateEvidence($userId)
+    {
+        $semesterName = $this->requireSemesterName($_POST['semester_name'] ?? '');
+        $evidenceId = isset($_POST['evidence_id']) ? (int) $_POST['evidence_id'] : 0;
+        $score = $this->requireScore($_POST['update_event_score'] ?? null, 'Thiếu điểm khi cập nhật minh chứng.');
+        $date = $this->requireValidDate($_POST['update_event_date'] ?? '');
+
+        if ($evidenceId <= 0) {
+            throw new RuntimeException('Thiếu ID minh chứng cần cập nhật.');
+        }
+
+        $fileData = $this->readUploadedFile('update_evidence');
+        $replaceFile = $fileData !== null;
+        $updated = $this->tpRepo->updateEvidence($userId, $evidenceId, $score, $date, $fileData, $replaceFile);
+
+        if (!$updated) {
+            error_log("TrainingPoint update failed for user_id={$userId}, evidence_id={$evidenceId}");
+            throw new RuntimeException('Không thể cập nhật minh chứng.');
+        }
+
+        return $this->buildPayload($userId, $semesterName, 'Cập nhật minh chứng thành công!');
+    }
+
+    private function handleDeleteEvidence($userId)
+    {
+        $semesterName = $this->requireSemesterName($_POST['semester_name'] ?? '');
+        $evidenceId = isset($_POST['evidence_id']) ? (int) $_POST['evidence_id'] : 0;
+
+        if ($evidenceId <= 0) {
+            throw new RuntimeException('Thiếu ID minh chứng cần xóa.');
+        }
+
+        $deleted = $this->tpRepo->deleteEvidence($userId, $evidenceId);
+        if (!$deleted) {
+            error_log("TrainingPoint delete failed for user_id={$userId}, evidence_id={$evidenceId}");
+            throw new RuntimeException('Không thể xóa minh chứng hoặc minh chứng không tồn tại.');
+        }
+
+        return $this->buildPayload($userId, $semesterName, 'Xóa minh chứng thành công!');
+    }
+
+    private function buildPayload($userId, $semesterName, $message)
+    {
+        $pageData = $this->getPageData($userId, $semesterName);
+
+        return [
+            'ok' => true,
+            'message' => $message,
+            'data' => $pageData
+        ];
+    }
+
+    private function ensureSemesterId($userId, $semesterName)
+    {
+        $semesterId = $this->tpRepo->getSemesterId($userId, $semesterName);
+        if ($semesterId) {
+            return $semesterId;
+        }
+
+        global $conn;
+        $stmt = $conn->prepare("INSERT INTO semesters (semester_name, user_id) VALUES (?, ?)");
+        if (!$stmt) {
+            throw new RuntimeException('Không thể tạo học kỳ mới: ' . $conn->error);
+        }
+
+        $stmt->bind_param("si", $semesterName, $userId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Không thể tạo học kỳ mới: ' . $stmt->error);
+        }
+
+        $semesterId = $conn->insert_id;
+        $stmt->close();
+
+        return $semesterId;
+    }
+
+    private function requireSemesterName($semesterName)
+    {
+        if ($semesterName === '') {
+            throw new RuntimeException('Thiếu thông tin học kỳ.');
+        }
+
+        return $semesterName;
+    }
+
+    private function requireScore($scoreRaw, $message)
+    {
+        if ($scoreRaw === null || $scoreRaw === '') {
+            throw new RuntimeException($message);
+        }
+
+        return (float) $scoreRaw;
+    }
+
+    private function requireValidDate($date)
+    {
+        if (!$this->isValidDate($date)) {
+            throw new RuntimeException('Ngày minh chứng không hợp lệ.');
+        }
+
+        return $date;
+    }
+
+    private function readUploadedFile($fieldName)
+    {
+        if (!isset($_FILES[$fieldName]['tmp_name']) || !is_uploaded_file($_FILES[$fieldName]['tmp_name'])) {
+            return null;
+        }
+
+        return file_get_contents($_FILES[$fieldName]['tmp_name']);
     }
 
     private function calculateClassification($score)
     {
-        if ($score >= 90)
+        if ($score >= 90) {
             return "Xuất sắc";
-        if ($score >= 80)
+        }
+        if ($score >= 80) {
             return "Tốt";
-        if ($score >= 65)
+        }
+        if ($score >= 65) {
             return "Khá";
-        if ($score >= 50)
+        }
+        if ($score >= 50) {
             return "Trung bình";
+        }
         return "Yếu/Kém";
     }
 
@@ -126,13 +260,63 @@ class TrainingPointService
             'classification' => 'N/A'
         ];
     }
-}
-// Khởi chạy hệ thống điều hướng tự động
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+
+    private function isValidDate($date)
+    {
+        $parsed = DateTime::createFromFormat('Y-m-d', $date);
+        return $parsed && $parsed->format('Y-m-d') === $date;
+    }
+
+    public static function sendJsonResponse($payload, $statusCode = 200)
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    public static function renderErrorPage($message, $details = '')
+    {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $safeDetails = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+
+        echo "<!DOCTYPE html><html lang='vi'><head><meta charset='UTF-8'><title>Lỗi Training Point</title>";
+        echo "<style>body{font-family:Arial,sans-serif;background:#f8fafc;padding:32px;color:#0f172a}.box{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(15,23,42,.08)}h1{margin-top:0;color:#b91c1c}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:8px;overflow:auto}</style>";
+        echo "</head><body><div class='box'><h1>Có lỗi khi xử lý minh chứng</h1><p>{$safeMessage}</p>";
+        if ($safeDetails !== '') {
+            echo "<pre>{$safeDetails}</pre>";
+        }
+        echo "<p>Quay lại <a href='../tpoint-page.php'>trang điểm rèn luyện</a> để thử lại.</p></div></body></html>";
+    }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
-    $tpService = new TrainingPointService();
-    $tpService->handleRequest($_SESSION['user_id']);
+if (basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    try {
+        if (!isset($_SESSION['user_id'])) {
+            throw new RuntimeException('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+
+        $tpService = new TrainingPointService();
+        $payload = $tpService->handleApiRequest($_SESSION['user_id']);
+        TrainingPointService::sendJsonResponse($payload);
+    } catch (Throwable $e) {
+        error_log('TrainingPointService error: ' . $e->getMessage());
+
+        $wantsJson = isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json');
+        if ($wantsJson || isset($_GET['action']) || isset($_POST['create_tpoint_evidence']) || isset($_POST['update_tpoint_evidence']) || isset($_POST['delete_tpoint_evidence'])) {
+            TrainingPointService::sendJsonResponse([
+                'ok' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+
+        TrainingPointService::renderErrorPage($e->getMessage(), $e->getTraceAsString());
+    }
 }

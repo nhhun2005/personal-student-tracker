@@ -1,4 +1,6 @@
 <?php
+ini_set('default_charset', 'UTF-8');
+
 $host = 'db'; // Change to localhost if you are using XAMPP(usually localhost)
 $username = 'root';
 $password = 'root'; // let this empty for xampp
@@ -9,5 +11,8 @@ $conn = mysqli_connect($host, $username, $password, $database);
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
+
+mysqli_set_charset($conn, 'utf8mb4');
+mysqli_query($conn, "SET NAMES utf8mb4");
 
 ?>
