@@ -87,7 +87,6 @@ function updateSummaryUI() {
     updateProgress(tpointState.currentScore, tpointState.maxScore);
 }
 
-
 function clearRenderedEvidence() {
     document.querySelectorAll(".event-container").forEach((container) => {
         container.innerHTML = "";
@@ -191,68 +190,14 @@ function buildCreateEvidenceFormData(card, criterionId) {
 
     return formData;
 }
-function attachScoreValidation(input, criterionId, currentEvidenceId = null) {
+
+// Logic validation mới: Chỉ chặn nhập số âm
+function attachScoreValidation(input) {
     if (input.dataset.hasValidation) return; // chặn duplicate
     input.dataset.hasValidation = "true";
 
-    const block = input.closest(".criterion-block");
-    const maxScore = Number(block?.dataset?.maxScore || 0);
-    input.max = maxScore;
-
     input.addEventListener("input", () => {
         let value = parseFloat(input.value);
-        if (isNaN(value)) return;
-
-        // 1. Tính tổng điểm gốc từ DB (những minh chứng ĐÃ LƯU của tiêu chí này)
-        let originalSavedTotal = 0;
-        (tpointState.savedEvidences || []).forEach(ev => {
-            if (String(ev.criterion_id) === String(criterionId)) {
-                originalSavedTotal += parseFloat(ev.score_value) || 0;
-            }
-        });
-
-        // 2. Tính điểm đang gõ trên DOM (những thẻ ĐANG NHẬP MỚI hoặc ĐANG SỬA, trừ thẻ hiện tại)
-        let activeDomTotal = 0;
-        let originalBeingEditedTotal = 0;
-
-        block.querySelectorAll('.event-card').forEach(card => {
-            const isSavedEdit = card.classList.contains('saved') && card.classList.contains('is-editing');
-            const isNew = card.dataset.pending === "true";
-
-            if (isNew || isSavedEdit) {
-                const cardInput = card.querySelector('.new-score-input, .saved-score-input');
-                
-                // Bỏ qua ô input mình đang gõ
-                if (cardInput && cardInput !== input) {
-                    activeDomTotal += parseFloat(cardInput.value) || 0;
-                    
-                    // Nếu thẻ đó là thẻ đã lưu đang bật chế độ sửa, ta phải trừ điểm gốc của nó ra 
-                    // (vì điểm gốc đã được cộng vào originalSavedTotal ở bước 1 rồi)
-                    if (isSavedEdit) {
-                         originalBeingEditedTotal += parseFloat(cardInput.dataset.originalValue || 0);
-                    }
-                }
-            }
-        });
-
-        // Điểm gốc của thẻ hiện tại (nếu đây là thẻ đã lưu đang bật lên sửa)
-        let myOriginalVal = 0;
-        if (currentEvidenceId) {
-            myOriginalVal = parseFloat(input.dataset.originalValue || 0);
-        }
-
-        // Quỹ điểm đã dùng = Tổng gốc đã lưu - (Điểm gốc của các thẻ đang sửa + thẻ hiện tại) + Tổng điểm đang gõ mới
-        const usedScore = originalSavedTotal - originalBeingEditedTotal - myOriginalVal + activeDomTotal;
-        const availableScore = maxScore - usedScore;
-        
-        // Làm tròn 1 chữ số thập phân để tránh lỗi float của JS (VD: 6 - 5.9 = 0.10000000005)
-        const allowedMax = Math.max(0, Math.round(availableScore * 10) / 10);
-
-        if (value > allowedMax) {
-            alert(`Tổng điểm tiêu chí này không được vượt quá ${maxScore}!\nCác minh chứng khác đã chiếm ${Math.round(usedScore * 10) / 10} điểm. Bạn chỉ có thể nhập tối đa ${allowedMax} điểm nữa.`);
-            input.value = allowedMax;
-        }
-
         if (value < 0) {
             input.value = 0;
         }
@@ -279,7 +224,7 @@ function addEvent(button, criterionId) {
         <input type="number" class="new-score-input" placeholder="Điểm" min="0" step="0.1" required>
         <label class="upload-label">
           📤 Minh chứng
-          <input type="file" class="new-file-input" accept="image/*,.pdf">
+          <input type="file" class="new-file-input" accept="image/*,text/plain">
         </label>
       </div>
       <small class="file-name-display" style="display:block; margin-top:5px; color:#666;"></small>
@@ -301,22 +246,15 @@ function addEvent(button, criterionId) {
     saveButton.addEventListener("click", async () => {
         try {
             const scoreInput = card.querySelector(".new-score-input");
-            const block = card.closest(".criterion-block");
-            const maxScore = Number(block.dataset.maxScore || 0);
-
             const dateInput = card.querySelector(".new-date-input");
             const fileInput = card.querySelector(".new-file-input");
 
             const score = parseFloat(scoreInput.value);
             const date = dateInput.value;
 
-            // Kiểm tra cứng giá trị bằng code thay vì chỉ chờ UI event
-            if (isNaN(score) || !date) {
-                alert("Vui lòng nhập đầy đủ điểm và ngày");
-                return;
-            }
-            if (score > maxScore) {
-                alert(`Điểm (${score}) không được vượt quá tối đa (${maxScore}) của tiêu chí này.`);
+            // Chỉ chặn nếu thiếu dữ liệu hoặc điểm là số âm
+            if (isNaN(score) || !date || score < 0) {
+                alert("Vui lòng nhập đầy đủ điểm và ngày hợp lệ (>= 0)");
                 return;
             }
 
@@ -371,8 +309,7 @@ function addEvent(button, criterionId) {
 
     container.prepend(card);
     const scoreInput = card.querySelector(".new-score-input");
-    // [CẬP NHẬT] Truyền thêm criterionId
-    attachScoreValidation(scoreInput, criterionId);
+    attachScoreValidation(scoreInput);
 }
 
 function setSavedEventEditMode(card, isEditing) {
@@ -432,7 +369,7 @@ function renderSavedEvent(container, data) {
           ${fileStatusMarkup}
           <label class="upload-label saved-upload-label">
             Chọn file mới
-            <input type="file" class="saved-file-input" accept="image/*,.pdf" onchange="displayFileName(this)" disabled>
+            <input type="file" class="saved-file-input" accept="image/*,text/plain" onchange="displayFileName(this)" disabled>
           </label>
         </div>
       </div>
@@ -453,8 +390,7 @@ function renderSavedEvent(container, data) {
     editButton?.addEventListener("click", () => {
         setSavedEventEditMode(card, true);
         const scoreInput = card.querySelector(".saved-score-input");
-        // [CẬP NHẬT] Truyền thêm criterion_id và evidence_id
-        attachScoreValidation(scoreInput, data.criterion_id, data.id);
+        attachScoreValidation(scoreInput);
     });
 
     cancelButton?.addEventListener("click", () => {
@@ -466,17 +402,9 @@ function renderSavedEvent(container, data) {
         const scoreValue = parseFloat(card.querySelector(".saved-score-input")?.value);
         const fileInput = card.querySelector(".saved-file-input");
 
-        const block = card.closest(".criterion-block");
-        const maxScore = Number(block.dataset.maxScore || 0);
-
-        if (!dateValue || isNaN(scoreValue)) {
-            showStatusMessage("Vui lòng nhập đủ ngày và điểm trước khi cập nhật.", true);
-            return;
-        }
-
-        // Chặn cứng logic ngay lúc submit Update
-        if (scoreValue > maxScore) {
-            showStatusMessage(`Điểm cập nhật (${scoreValue}) không được vượt quá tối đa (${maxScore}).`, true);
+        // Chỉ chặn nếu thiếu dữ liệu hoặc điểm là số âm
+        if (!dateValue || isNaN(scoreValue) || scoreValue < 0) {
+            showStatusMessage("Vui lòng nhập đủ ngày và điểm hợp lệ (>= 0) trước khi cập nhật.", true);
             return;
         }
 
@@ -581,12 +509,9 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
             const date = card.querySelector(".new-date-input")?.value;
             const scoreVal = parseFloat(card.querySelector(".new-score-input")?.value);
             const fileInput = card.querySelector(".new-file-input");
-            
-            const block = card.closest(".criterion-block");
-            const maxScore = Number(block.dataset.maxScore || 0);
 
-            // Bỏ qua thẻ chưa nhập đủ thông tin hoặc vượt điểm tối đa
-            if (isNaN(scoreVal) || !date || scoreVal > maxScore) {
+            // Chỉ chặn nếu thiếu dữ liệu hoặc điểm là số âm
+            if (isNaN(scoreVal) || !date || scoreVal < 0) {
                 hasError = true;
                 continue; 
             }
@@ -602,6 +527,7 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
                 formData.append("evidence", fileInput.files[0]);
             }
 
+            // Fetch trực tiếp để không gọi lại data liên tục
             const response = await fetch("./services/TrainingPointService.php", {
                 method: "POST",
                 headers: { Accept: "application/json" },
@@ -618,7 +544,7 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
         await fetchTpointData();
         
         if (hasError) {
-            showStatusMessage("Đã xử lý, nhưng có vài mục bị lỗi (Kiểm tra lại điểm vượt rào hoặc thiếu dữ liệu)", true);
+            showStatusMessage("Đã xử lý, nhưng có vài mục bị lỗi (Kiểm tra lại dữ liệu điểm ngày/tháng).", true);
         } else {
             showStatusMessage("Lưu tất cả thành công", false);
         }

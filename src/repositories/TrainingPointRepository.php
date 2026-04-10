@@ -15,9 +15,6 @@ class TrainingPointRepository
         return $stmt;
     }
 
-    /**
-     * Lấy ID học kỳ của một User cụ thể
-     */
     public function getSemesterId($userId, $semesterName)
     {
         $stmt = $this->prepareOrFail("SELECT id FROM semesters WHERE user_id = ? AND semester_name = ? LIMIT 1");
@@ -29,15 +26,15 @@ class TrainingPointRepository
         return $result ? $result['id'] : null;
     }
 
-    /**
-     * Lấy danh sách minh chứng dựa trên UserId và SemesterId
-     */
+    // [CẬP NHẬT]: Lấy thêm max_score từ bảng criterions
     public function getEvidenceBySemesterId($userId, $semesterId)
     {
-        $sql = "SELECT id, criterion_id, score_value, event_date, 
-                       (CASE WHEN content IS NOT NULL AND LENGTH(content) > 0 THEN 1 ELSE 0 END) as has_content 
-                FROM evidences 
-                WHERE user_id = ? AND semester_id = ?";
+        $sql = "SELECT e.id, e.criterion_id, e.score_value, e.event_date, 
+                       (CASE WHEN e.content IS NOT NULL AND LENGTH(e.content) > 0 THEN 1 ELSE 0 END) as has_content,
+                       c.max_score
+                FROM evidences e
+                JOIN criterions c ON e.criterion_id = c.id
+                WHERE e.user_id = ? AND e.semester_id = ?";
 
         $stmt = $this->prepareOrFail($sql);
         $stmt->bind_param("ii", $userId, $semesterId);
@@ -49,9 +46,6 @@ class TrainingPointRepository
         return $data;
     }
 
-    /**
-     * Lưu minh chứng mới vào Database
-     */
     public function saveEvidence($userId, $semesterId, $critId, $score, $date, $fileData = null)
     {
         $sql = "INSERT INTO evidences (content, score_value, event_date, criterion_id, user_id, semester_id) 
@@ -109,9 +103,7 @@ class TrainingPointRepository
         return $affectedRows > 0;
     }
 
-    /**
-     * HÀM MỚI: Lấy max_score từ bảng criterions để chặn Server-side khi TẠO MỚI
-     */
+    // Các hàm dưới đây giữ nguyên (dù không còn dùng để chặn lỗi cứng, nhưng có thể cần thiết về sau)
     public function getCriterionMaxScore($critId)
     {
         $stmt = $this->prepareOrFail("SELECT max_score FROM criterions WHERE id = ? LIMIT 1");
@@ -123,9 +115,6 @@ class TrainingPointRepository
         return $result ? (float)$result['max_score'] : 0;
     }
 
-    /**
-     * HÀM MỚI: Lấy max_score từ bảng criterions dựa vào ID minh chứng để chặn Server-side khi UPDATE
-     */
     public function getMaxScoreByEvidenceId($evidenceId, $userId)
     {
         $sql = "SELECT c.max_score 
@@ -141,3 +130,4 @@ class TrainingPointRepository
         return $result ? (float)$result['max_score'] : 0;
     }
 }
+?>

@@ -18,31 +18,44 @@ class TrainingPointService
         }
 
         $evidenceData = $this->tpRepo->getEvidenceBySemesterId($userId, $semesterId);
-        $sectionScores = [
-            'I' => 0,
-            'II' => 0,
-            'III' => 0,
-            'IV' => 0,
-            'V' => 0
-        ];
+        
+        // 1. Tính tổng điểm cho TỪNG TIÊU CHÍ (ví dụ: cộng tất cả minh chứng của I.a)
+        $criterionSums = [];
+        $criterionMaxes = [];
 
         foreach ($evidenceData as $row) {
             $critId = (int) $row['criterion_id'];
             $scoreValue = (float) $row['score_value'];
+            $maxScore = (float) $row['max_score'];
+
+            if (!isset($criterionSums[$critId])) {
+                $criterionSums[$critId] = 0;
+                $criterionMaxes[$critId] = $maxScore;
+            }
+            $criterionSums[$critId] += $scoreValue;
+        }
+
+        // 2. Phân bổ điểm đã "cắt ngọn" của từng tiêu chí vào 5 mục lớn
+        $sectionScores = ['I' => 0, 'II' => 0, 'III' => 0, 'IV' => 0, 'V' => 0];
+
+        foreach ($criterionSums as $critId => $sum) {
+            // CẮT NGỌN ĐIỂM TIÊU CHÍ: Điểm thực nhận không vượt quá max_score của tiêu chí đó
+            $actualScore = min($sum, $criterionMaxes[$critId]);
 
             if ($critId >= 1 && $critId <= 5) {
-                $sectionScores['I'] += $scoreValue;
+                $sectionScores['I'] += $actualScore;
             } elseif ($critId >= 6 && $critId <= 7) {
-                $sectionScores['II'] += $scoreValue;
+                $sectionScores['II'] += $actualScore;
             } elseif ($critId >= 8 && $critId <= 10) {
-                $sectionScores['III'] += $scoreValue;
+                $sectionScores['III'] += $actualScore;
             } elseif ($critId >= 11 && $critId <= 13) {
-                $sectionScores['IV'] += $scoreValue;
+                $sectionScores['IV'] += $actualScore;
             } elseif ($critId >= 14 && $critId <= 17) {
-                $sectionScores['V'] += $scoreValue;
+                $sectionScores['V'] += $actualScore;
             }
         }
 
+        // 3. CẮT NGỌN ĐIỂM MỤC LỚN (Ví dụ mục I tối đa 20 điểm)
         $finalScores = [
             1 => min($sectionScores['I'], 20),
             2 => min($sectionScores['II'], 25),
@@ -108,11 +121,7 @@ class TrainingPointService
             throw new RuntimeException('Thiếu tiêu chí khi lưu minh chứng.');
         }
 
-        // VALIDATION: Kiểm tra điểm vượt rào bằng Server-side
-        $maxScore = $this->tpRepo->getCriterionMaxScore($criterionId);
-        if ($score > $maxScore) {
-            throw new RuntimeException("Điểm bị từ chối: $score lớn hơn điểm tối đa ($maxScore) của mục này.");
-        }
+        // Đã xóa logic chặn điểm max tại đây
 
         $semesterId = $this->ensureSemesterId($userId, $semesterName);
         $fileData = $this->readUploadedFile('evidence');
@@ -137,11 +146,7 @@ class TrainingPointService
             throw new RuntimeException('Thiếu ID minh chứng cần cập nhật.');
         }
 
-        // VALIDATION: Kiểm tra điểm vượt rào bằng Server-side khi Cập nhật
-        $maxScore = $this->tpRepo->getMaxScoreByEvidenceId($evidenceId, $userId);
-        if ($score > $maxScore) {
-            throw new RuntimeException("Điểm bị từ chối: $score lớn hơn điểm tối đa ($maxScore) của mục này.");
-        }
+        // Đã xóa logic chặn điểm max tại đây
 
         $fileData = $this->readUploadedFile('update_evidence');
         $replaceFile = $fileData !== null;
