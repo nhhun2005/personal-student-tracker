@@ -2,7 +2,7 @@
 
 ## How to deploy?
 
-### Option 1: Using Docker (Recommended)
+### Using Docker (Recommended)
 This is the fastest way to get the app running with all dependencies pre-configured.
 
 1.  **Install dependencies:** Run the following command to download PHP libraries (Resend SDK, Dotenv, etc.):
@@ -23,14 +23,3 @@ This is the fastest way to get the app running with all dependencies pre-configu
     - phpMyAdmin: [http://localhost:8081/](http://localhost:8081/)
 
 ---
-
-### Option 2: Using XAMPP (Manual)
-1.  **Install Composer:** Ensure you have [Composer](https://getcomposer.org/) installed on your machine.
-2.  **Install PHP Libraries:** Open terminal in the `src/` directory and run:
-    ```bash
-    composer install
-    ```
-3.  **Database Config:** - Import the SQL file (if provided) into your MySQL via phpMyAdmin.
-    - Change the MySQL password to `root` (or your current password).
-    - Update connection variables in `src/includes/connect-db.php` and your `.env` file.
-4.  **Run:** Move the `src/` content to your `htdocs` folder and access via `http://localhost/`.
