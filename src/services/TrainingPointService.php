@@ -4,6 +4,7 @@ require_once __DIR__ . '/../repositories/TrainingPointRepository.php';
 class TrainingPointService
 {
     private $tpRepo;
+    // Khởi tạo service, inject repository để thao tác với database
 
     public function __construct()
     {
@@ -18,7 +19,7 @@ class TrainingPointService
         }
 
         $evidenceData = $this->tpRepo->getEvidenceBySemesterId($userId, $semesterId);
-        
+
         // 1. Tính tổng điểm cho TỪNG TIÊU CHÍ (ví dụ: cộng tất cả minh chứng của I.a)
         $criterionSums = [];
         $criterionMaxes = [];
@@ -74,6 +75,7 @@ class TrainingPointService
             'classification' => $this->calculateClassification($totalSum)
         ];
     }
+    // Entry point xử lý request từ client (GET: lấy data, POST: CRUD minh chứng)
 
     public function handleApiRequest($userId)
     {
@@ -109,7 +111,7 @@ class TrainingPointService
 
         throw new RuntimeException('Request không hợp lệ hoặc thiếu action submit.');
     }
-
+    // Xử lý thêm minh chứng mới: validate input → lấy/ tạo semester → lưu DB → trả data mới
     private function handleCreateEvidence($userId)
     {
         $semesterName = $this->requireSemesterName($_POST['semester_name'] ?? '');
@@ -121,7 +123,6 @@ class TrainingPointService
             throw new RuntimeException('Thiếu tiêu chí khi lưu minh chứng.');
         }
 
-        // Đã xóa logic chặn điểm max tại đây
 
         $semesterId = $this->ensureSemesterId($userId, $semesterName);
         $fileData = $this->readUploadedFile('evidence');
@@ -134,6 +135,7 @@ class TrainingPointService
 
         return $this->buildPayload($userId, $semesterName, 'Lưu minh chứng thành công!');
     }
+    // Xử lý cập nhật minh chứng: validate input → update DB → trả data mới
 
     private function handleUpdateEvidence($userId)
     {
@@ -160,6 +162,8 @@ class TrainingPointService
         return $this->buildPayload($userId, $semesterName, 'Cập nhật minh chứng thành công!');
     }
 
+    // Xử lý xóa minh chứng: kiểm tra ID → xóa DB → cập nhật lại data trả về
+
     private function handleDeleteEvidence($userId)
     {
         $semesterName = $this->requireSemesterName($_POST['semester_name'] ?? '');
@@ -178,6 +182,8 @@ class TrainingPointService
         return $this->buildPayload($userId, $semesterName, 'Xóa minh chứng thành công!');
     }
 
+    // Tạo payload trả về cho client (gồm message + toàn bộ dữ liệu trang)
+
     private function buildPayload($userId, $semesterName, $message)
     {
         $pageData = $this->getPageData($userId, $semesterName);
@@ -188,6 +194,8 @@ class TrainingPointService
             'data' => $pageData
         ];
     }
+    // Đảm bảo tồn tại semester: nếu chưa có thì tạo mới, nếu có rồi thì lấy ID
+
 
     private function ensureSemesterId($userId, $semesterName)
     {
@@ -213,6 +221,7 @@ class TrainingPointService
 
         return $semesterId;
     }
+    // Validate học kỳ (không được rỗng)
 
     private function requireSemesterName($semesterName)
     {
@@ -222,6 +231,7 @@ class TrainingPointService
 
         return $semesterName;
     }
+    // Validate điểm (không null, ép về float)
 
     private function requireScore($scoreRaw, $message)
     {
@@ -232,6 +242,8 @@ class TrainingPointService
         return (float) $scoreRaw;
     }
 
+    // Validate ngày hợp lệ (format Y-m-d)
+
     private function requireValidDate($date)
     {
         if (!$this->isValidDate($date)) {
@@ -240,7 +252,7 @@ class TrainingPointService
 
         return $date;
     }
-
+    // Đọc file upload từ request (nếu có), trả về binary data hoặc null
     private function readUploadedFile($fieldName)
     {
         if (!isset($_FILES[$fieldName]['tmp_name']) || !is_uploaded_file($_FILES[$fieldName]['tmp_name'])) {
@@ -249,6 +261,7 @@ class TrainingPointService
 
         return file_get_contents($_FILES[$fieldName]['tmp_name']);
     }
+    // Phân loại điểm rèn luyện dựa trên tổng điểm
 
     private function calculateClassification($score)
     {
@@ -266,6 +279,7 @@ class TrainingPointService
         }
         return "Yếu/Kém";
     }
+    // Trả về dữ liệu rỗng khi chưa có minh chứng
 
     private function getEmptyData($semesterName)
     {
@@ -277,12 +291,15 @@ class TrainingPointService
             'classification' => 'N/A'
         ];
     }
+    // Kiểm tra format ngày có hợp lệ không
 
     private function isValidDate($date)
     {
         $parsed = DateTime::createFromFormat('Y-m-d', $date);
         return $parsed && $parsed->format('Y-m-d') === $date;
     }
+
+    // Trả response JSON cho client
 
     public static function sendJsonResponse($payload, $statusCode = 200)
     {
@@ -291,7 +308,7 @@ class TrainingPointService
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
         exit();
     }
-
+    // Render trang lỗi HTML khi có exception
     public static function renderErrorPage($message, $details = '')
     {
         http_response_code(500);
