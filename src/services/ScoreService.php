@@ -9,7 +9,7 @@ class ScoreService
     {
         $this->scoreRepo = new ScoreRepository();
     }
-    
+    //tương tự usẻ, cái này là hứng request
     public function handleRequest($userId)
     {
         if (isset($_POST['save_score'])) {
@@ -18,7 +18,7 @@ class ScoreService
             $this->handleDeleteCourse($userId); 
         }
     }
-
+//cái này là lấy dữ liệu trang để render
     public function getScorePageData($userId, $options)
     {
         $semester = $options['semester'] ?? 'HK2 2025-2026';
@@ -50,7 +50,7 @@ class ScoreService
             'semester' => $semester
         ];
     }
-
+//lưu điểm
     public function handleScoreSave($userId)
     {
         if (isset($_POST['save_score'])) {
@@ -78,7 +78,7 @@ class ScoreService
             exit();
         }
     }
-
+//xóa môn
     public function handleDeleteCourse($userId)
     {
         if (isset($_POST['delete_course'])) {

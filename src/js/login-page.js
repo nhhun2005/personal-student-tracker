@@ -1,4 +1,4 @@
-// This one is for switching "dang nhap" and "dang ky"
+//công tắc đổi tab giữa đăng nhập và đăng ký
 const tabs = document.querySelectorAll(".option-item");
 const forms = document.querySelectorAll(
   "#login-form-container, #signup-form-container",

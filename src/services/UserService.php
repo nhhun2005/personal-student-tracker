@@ -18,7 +18,7 @@ class UserService
         $apiKey = $_ENV['RESEND_API_KEY'];
         $this->resend = Resend::client($apiKey);
     }
-
+//hàm này sẽ hoạt động giống hứng request
     public function handleRequest()
     {
         if (isset($_POST['login_submit'])) {
@@ -34,7 +34,7 @@ class UserService
             exit();
         }
     }
-
+//xử lý đky
     private function register()
     {
         $username = $_POST['username_signup'] ?? '';
@@ -70,7 +70,7 @@ class UserService
         }
         exit();
     }
-
+//xử lý đăng nhập
     private function login()
     {
         $username = $_POST['username'] ?? '';
@@ -94,6 +94,7 @@ class UserService
         }
         exit();
     }
+    //xử lý quên mk
     private function forgotPassword()
     {
         $email = $_POST['email'] ?? '';
@@ -132,6 +133,7 @@ class UserService
         }
         exit();
     }
+    //đổi mk qua tính năng quên mk
     private function resetPassword()
     {
         $token = $_POST['token'] ?? '';
@@ -158,6 +160,7 @@ class UserService
         }
         exit();
     }
+    //kiểm chứng token coi đúng ko mới cho đổi mk
     public function validateToken($token)
     {
         if (empty($token)) {

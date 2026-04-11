@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $scoreService = new ScoreService();
-// Lấy dữ liệu dựa trên các tham số từ AJAX gửi lên (GET)
+//lấy dữ liệu điểm của người dùng từ csdl, dùng bằng user_id
 $data = $scoreService->getScorePageData($_SESSION['user_id'], $_GET);
 
-// Trả về JSON để JavaScript xử lý
+// Trả về JSON để JavaScript xử lý -> đang xài aja"x" dựa trên json thay vì xml
 header('Content-Type: application/json');
 echo json_encode($data);

@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gpaValue = document.querySelector(".total-score h2");
     const gpaClassification = document.querySelector(".total-score h3");
 
-    // 1. CHỨC NĂNG AJAX: Tải dữ liệu từ server
+    // ajax: lấy dữ liệu từ server sau đó gọi hàm update UI để update
     async function fetchScores(url) {
         try {
             const response = await fetch(url);
@@ -18,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateUI(data) {
-        // Cập nhật GPA và Xếp loại
-        gpaValue.innerText = parseFloat(data.gpa).toFixed(2);
-        updateClassification(data.gpa);
+        //cập nhật lại điểm và phân loại
+        gpaValue.innerText = parseFloat(data.gpa).toFixed(2); 
+        updateClassification(data.gpa); //hàm cập nhật phân loại
 
-        // Render lại danh sách môn học từ server
+        //render lại danh sách môn học từ server
         const offset = (data.current_page - 1) * 5;
         const formattedData = data.courses.map(c => ({
             id: c.id,
@@ -30,10 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
             credits: c.credits,
             score: c.score
         }));
-        
+        //render các thẻ môn học mới
         renderCards(formattedData.length, formattedData, offset);
 
-        // Render lại phân trang
+        //render lại mấy cái ô phân trang
         let pagHtml = "";
         for (let i = 1; i <= data.total_pages; i++) {
             pagHtml += `<a href="#" data-page="${i}" class="page-link ${i == data.current_page ? 'active' : ''}">${i}</a>`;
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             paginationContainer.style.display = "flex";
         }
     }
-
+    // cập nhật lại phân loại dưa theo ctu
     function updateClassification(score) {
         let rank = "Yếu/Kém";
         if (score >= 3.6) rank = "Xuất sắc";
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gpaClassification.innerText = "Xếp loại: " + rank;
     }
 
-    // 2. CHỨC NĂNG THỦ CÔNG: Thay đổi số lượng môn
+    //thay đổi số lượng môn
     if (typeof IS_ALL_MODE !== 'undefined' && IS_ALL_MODE) {
         // Nếu ở chế độ "Tất cả", không cho sửa số lượng
     } else if (courseCountInput) {
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (paginationContainer) paginationContainer.style.display = "none";
         });
     }
-
+    //lấy dữ liệu đã nhập vào thành một cụm data để sử lý cho khỏe
     function harvestCurrentData() {
         const names = document.getElementsByName("c_name[]");
         const credits = document.getElementsByName("c_credit[]");
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return data;
     }
-
+    //render các thẻ
     function renderCards(count, data = [], offset = 0) {
         courseContainer.innerHTML = "";
         const isReadOnly = (typeof IS_ALL_MODE !== 'undefined' && IS_ALL_MODE) ? 'readonly' : '';
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             courseContainer.appendChild(card);
         }
     }
-
+//cái này là để chống việc người dùng nhập vào những kí tự đặc biệt tào lao hack hệ thống
     function escapeHtml(text) {
         if (!text) return "";
         const div = document.createElement('div');
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return div.innerHTML;
     }
 
-    // 3. EVENT LISTENERS CHO FILTER & PAGINATION
+    // lắng nghe phân trang với filter
     if (filterForm) {
         filterForm.addEventListener('submit', (e) => {
             e.preventDefault();

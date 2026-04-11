@@ -4,6 +4,7 @@ include_once __DIR__ . "/../models/models.php";
 
 class ScoreRepository
 {
+    //hàm này tìm score dựa trên filter và pagination, không có thì tìm thông thường
     public function getCourses($userId, $semester, $searchName, $searchCredit, $sortBy, $sortOrder, $limit, $offset)
     {
         global $conn;
@@ -46,7 +47,7 @@ class ScoreRepository
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
-
+    // đếm số môn cho pagination
     public function countCourses($userId, $semester, $searchName, $searchCredit)
     {
         global $conn;
@@ -80,7 +81,7 @@ class ScoreRepository
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc()['total'];
     }
-
+// cập nhật lại điểm của môn học
     public function updateCourseScores($userId, $semesterName, $courseNames, $credits, $scores)
     {
         global $conn;
@@ -115,6 +116,7 @@ class ScoreRepository
         }
         return true;
     }
+    //xóa môn học
     public function deleteCourse($courseId, $userId)
     {
         global $conn;

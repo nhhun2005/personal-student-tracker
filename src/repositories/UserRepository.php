@@ -4,7 +4,7 @@ include_once __DIR__ . "/../models/models.php";
 
 class UserRepository
 {
-
+// kiểm tra sự tồn tại của user này
     public function isExisted($userId, $email)
     {
         global $conn;
@@ -17,6 +17,7 @@ class UserRepository
         $stmt->close();
         return (bool) $user['existed'];
     }
+    //lưu user lên db
     public function save(User $user)
     {
         global $conn;
@@ -39,6 +40,7 @@ class UserRepository
         $stmt->close();
         return $success;
     }
+    //tìm bằng id
     public function getById($userId)
     {
         global $conn;
@@ -66,6 +68,7 @@ class UserRepository
 
         return null;
     }
+    //tìm bằng usẻname
     public function getByUsername($username)
     {
         global $conn;
@@ -93,7 +96,7 @@ class UserRepository
 
         return null;
     }
-
+//tìm bằng email
     public function getByEmail($email)
     {
         global $conn;
@@ -121,7 +124,7 @@ class UserRepository
 
         return null;
     }
-
+//cập nhật lại reset token cho tính năng quên mk
     public function updateResetToken($email, $token, $expire)
     {
         global $conn;
@@ -132,6 +135,7 @@ class UserRepository
         $stmt->close();
         return $success;
     }
+    //tìm usẻ bằng valid token cũng là để reset mk
     public function getUserByValidToken($token)
     {
         global $conn;
@@ -144,6 +148,7 @@ class UserRepository
         $stmt->close();
         return $user;
     }
+    //cập nhật mk mới và xóa token
     public function updatePasswordAndClearToken($userId, $newPassword)
     {
         global $conn;

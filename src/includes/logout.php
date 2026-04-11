@@ -1,16 +1,12 @@
 <?php
-/**
- * Logout Logic - Enterprise Standard
- * Đảm bảo xóa sạch Session ở cả Server và Client (Cookie)
- */
 
 session_start();
 
-// 1. Xóa tất cả các biến lưu trong mảng $_SESSION
+//xóa session
 $_SESSION = array();
 
 // 2. Nếu muốn xóa sạch Cookie Session ở trình duyệt (PHPSESSID)
-// Đây là bước quan trọng để bảo mật tuyệt đối
+// Đây là bước quan trọng để bảo mật tuyệt đối, cái này là mấy cái cơ chế bảo mật của cookies
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(
