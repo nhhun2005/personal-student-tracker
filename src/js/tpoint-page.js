@@ -1,4 +1,3 @@
-//Max điểm từng phần, 
 const sectionLimits = {
     I: 20,
     II: 25,
@@ -15,20 +14,20 @@ let tpointState = {
     classification: "N/A",
     savedEvidences: []
 };
-// Hàm tiện ích để toggle accordion, có thể dùng cho cả phần tổng quan và phần chi tiết của từng tiêu chí
+
 function toggleAccordion(element) {
     const card = element.parentElement;
     card.classList.toggle("active");
 }
-// Hàm tiện ích để chuyển đổi học kỳ, có thể dùng cho dropdown hoặc các nút chuyển học kỳ khác nếu cần thiết
+
 function changeSemester(semesterName) {
     window.location.href = "?semester=" + encodeURIComponent(semesterName);
 }
-// Hàm tiện ích để lấy ngày hiện tại theo định dạng YYYY-MM-DD, có thể dùng cho cả thẻ mới và thẻ đã lưu khi cần thiết
+
 function getTodayDate() {
     return new Date().toISOString().split("T")[0];
 }
-// Hàm chung để hiển thị tên file đã chọn, có thể dùng cho cả thẻ mới và thẻ đã lưu khi chọn file
+
 function displayFileName(input) {
     const name = input.files[0] ? input.files[0].name : "";
     const display = input.closest(".event-card").querySelector(".file-name-display");
@@ -36,7 +35,7 @@ function displayFileName(input) {
         display.textContent = name ? `File: ${name}` : "";
     }
 }
-// Hàm chung để cập nhật thanh tiến trình dựa trên điểm số hiện tại và điểm tối đa, có thể gọi lại sau khi fetch dữ liệu mới hoặc sau khi tạo/cập nhật/xóa minh chứng để đồng bộ UI
+
 function updateProgress(score, maxScore) {
     const percent = maxScore > 0 ? Math.min((score / maxScore) * 100, 100) : 0;
     const fill = document.getElementById("progressFill");
@@ -44,7 +43,7 @@ function updateProgress(score, maxScore) {
         fill.style.width = percent + "%";
     }
 }
-// Hàm chung để hiển thị thông báo trạng thái, có thể dùng cho cả thành công và lỗi
+
 function showStatusMessage(message, isError = false) {
     const box = document.getElementById("statusMessage");
     if (!box) return;
@@ -61,7 +60,7 @@ function showStatusMessage(message, isError = false) {
     box.style.color = isError ? "#b91c1c" : "#0369a1";
     box.style.borderColor = isError ? "#fecaca" : "#bae6fd";
 }
-// Hàm chung để cập nhật toàn bộ UI liên quan đến điểm số và phân loại dựa trên state hiện tại, có thể gọi lại sau khi fetch dữ liệu mới hoặc sau khi tạo/cập nhật/xóa minh chứng để đồng bộ UI
+
 function updateSummaryUI() {
     const totalScore = document.getElementById("totalScore");
     if (totalScore) {
@@ -87,13 +86,13 @@ function updateSummaryUI() {
 
     updateProgress(tpointState.currentScore, tpointState.maxScore);
 }
-// Hàm chung để xóa tất cả minh chứng đã render, chuẩn bị cho việc render lại từ state mới
+
 function clearRenderedEvidence() {
     document.querySelectorAll(".event-container").forEach((container) => {
         container.innerHTML = "";
     });
 }
-// Hàm chung để render lại tất cả minh chứng từ state, có thể gọi lại sau khi fetch dữ liệu mới hoặc sau khi tạo/cập nhật/xóa minh chứng để đồng bộ UI
+
 function renderAllEvidence() {
     clearRenderedEvidence();
 
@@ -115,7 +114,7 @@ function renderAllEvidence() {
         renderSavedEvent(container, evidence);
     });
 }
-// Hàm chung để áp dụng dữ liệu mới từ backend vào state và cập nhật UI, có thể gọi lại sau khi tạo/cập nhật/xóa minh chứng để đồng bộ UI
+
 function applyBackendData(data, message = "") {
     tpointState = {
         currentScore: Number(data.final_score || 0),
@@ -135,7 +134,7 @@ function applyBackendData(data, message = "") {
     renderAllEvidence();
     showStatusMessage(message, false);
 }
-// Hàm chung để fetch dữ liệu điểm rèn luyện từ backend, có thể gọi lại sau khi tạo/cập nhật/xóa minh chứng để đồng bộ UI
+
 async function fetchTpointData() {
     const params = new URLSearchParams({
         action: "fetch_tpoint_data",
@@ -153,7 +152,7 @@ async function fetchTpointData() {
 
     applyBackendData(payload.data, payload.message || "");
 }
-// Hàm chung để gửi yêu cầu tạo/cập nhật/xóa minh chứng,
+
 async function sendEvidenceRequest(formData) {
     const response = await fetch("./services/TrainingPointService.php", {
         method: "POST",
@@ -169,7 +168,7 @@ async function sendEvidenceRequest(formData) {
     await fetchTpointData();
     showStatusMessage(payload.message || "Thao tác thành công.", false);
 }
-// Hàm tiện ích để xây dựng FormData từ thẻ sự kiện mới, có thể dùng chung cho cả nút lưu từng thẻ và nút lưu tất cả
+
 function buildCreateEvidenceFormData(card, criterionId) {
     const dateValue = card.querySelector(".new-date-input")?.value || "";
     const scoreValue = card.querySelector(".new-score-input")?.value || "";
@@ -204,7 +203,7 @@ function attachScoreValidation(input) {
         }
     });
 }
-// Logic thêm sự kiện mới: Cho phép tạo thẻ mới ngay lập tức, nhưng chỉ chặn khi lưu nếu thiếu dữ liệu hoặc điểm âm
+
 function addEvent(button, criterionId) {
     const container = button.previousElementSibling;
     const eventCount = container.querySelectorAll(".event-card").length + 1;
@@ -490,7 +489,7 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
         alert("Không có dữ liệu cần lưu");
         return;
     }
-// UI loading chung cho tất cả
+
     const saveBtn = document.getElementById("saveAllBtn");
     const originalText = saveBtn.textContent;
     saveBtn.disabled = true;
@@ -541,7 +540,7 @@ document.getElementById("saveAllBtn")?.addEventListener("click", async () => {
                 hasError = true;
             }
         }
-// Sau khi xử lý tất cả, gọi lại fetch để cập nhật UI 1 lần duy nhất
+
         await fetchTpointData();
         
         if (hasError) {

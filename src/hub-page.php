@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
-// Tải dữ liệu người dùng và đảm bảo xác thực trước khi hiển thị hubpage
 require_once './includes/process-hub.php';
 ?>
 
