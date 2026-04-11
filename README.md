@@ -17,8 +17,9 @@ This is the fastest way to get the app running with all dependencies pre-configu
     ```bash
     docker compose up -d
     ```
-
-4.  **Access the App:**
+4.  **IMPORTANT**
+    - Import semesters and criterions data before accesss the app, its is required for training point page.
+5.  **Access the App:**
     - Web App: [http://localhost:8080/](http://localhost:8080/)
     - phpMyAdmin: [http://localhost:8081/](http://localhost:8081/)
 
