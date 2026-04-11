@@ -112,8 +112,9 @@ class TrainingPointRepository
         $result = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        return $result ? (float)$result['max_score'] : 0;
+        return $result ? (float) $result['max_score'] : 0;
     }
+    // Get maximum points based on existing evidence.
 
     public function getMaxScoreByEvidenceId($evidenceId, $userId)
     {
@@ -127,7 +128,7 @@ class TrainingPointRepository
         $result = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        return $result ? (float)$result['max_score'] : 0;
+        return $result ? (float) $result['max_score'] : 0;
     }
 }
 ?>
